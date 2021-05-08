@@ -23,6 +23,10 @@ async function handleRequest(request) {
         }
 
         let hookSplit = request.url.split("workers.dev/")[1].split("/");
+        if (hookSplit.length === 1) {
+            return new Response('Missing Webhook Authorization', { status: 400 });
+        }
+
         let hookId = hookSplit[0];
         let hookToken = hookSplit[1];
 
