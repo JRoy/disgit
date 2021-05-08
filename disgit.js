@@ -189,7 +189,7 @@ function buildRelease(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] New " + (prerelease ? "pre" : "") + "release published: " + effectiveName,
-                "description": body,
+                "description": truncate(body, 1000),
                 "url": html_url,
                 "author": {
                     "name": sender["login"],
@@ -240,7 +240,7 @@ function buildPush(json) {
         let commit = commits[i];
         let commitUrl = commit["url"];
         let line = "[`" + shortCommit(commit["id"]) + "`](" +commitUrl + ") " + truncate(commit["message"], 50) + " - " + commit["author"]["username"] + "\n";
-        if (description.length + line.length >= 2048) {
+        if (description.length + line.length >= 1500) {
             break;
         }
         lastCommitUrl = commitUrl;
@@ -275,7 +275,7 @@ function buildPullReviewComment(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] Pull request review comment: #" + pull_request["number"] + " " + pull_request["title"],
-                "description": comment["body"],
+                "description": truncate(comment["body"], 1000),
                 "url": comment["html_url"],
                 "author": {
                     "name": sender["login"],
@@ -320,7 +320,7 @@ function buildPullReview(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] Pull request " + state + ": #" + pull_request["number"] + " " + pull_request["title"],
-                "description": review["body"],
+                "description": truncate(review["body"], 1000),
                 "url": review["html_url"],
                 "author": {
                     "name": sender["login"],
@@ -449,7 +449,7 @@ function buildPull(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] " + type + " opened: #" + pull_request["number"] + " " + pull_request["title"],
-                "description": pull_request["body"],
+                "description": truncate(pull_request["body"], 1000),
                 "url": pull_request["html_url"],
                 "author": {
                     "name": sender["login"],
@@ -475,7 +475,7 @@ function buildIssueComment(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] New comment on " + entity + ": #" + issue["number"] + " " + issue["title"],
-                "description": comment["body"],
+                "description": truncate(comment["body"], 1000),
                 "url": comment["html_url"],
                 "author": {
                     "name": sender["login"],
@@ -545,7 +545,7 @@ function buildIssue(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] Issue opened: #" + issue["number"] + " " + issue["title"],
-                "description": issue["body"],
+                "description": truncate(issue["body"], 1000),
                 "url": issue["html_url"],
                 "author": {
                     "name": sender["login"],
@@ -593,7 +593,7 @@ function buildDiscussionComment(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] New comment on discussion: #" + discussion["number"] + " " + discussion["title"],
-                "description": comment["body"],
+                "description": truncate(comment["body"], 1000),
                 "url": comment["html_url"],
                 "author": {
                     "name": sender["login"],
@@ -621,7 +621,7 @@ function buildDiscussion(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] New discussion: #" + discussion["number"] + " " + discussion["title"],
-                "description": discussion["body"],
+                "description": truncate(discussion["body"], 1000),
                 "url": discussion["html_url"],
                 "author": {
                     "name": sender["login"],
@@ -692,7 +692,7 @@ function buildCommitComment(json) {
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] New comment on commit `" + shortCommit(comment["commit_id"]) + "`",
-                "description": comment["body"],
+                "description": truncate(comment["body"], 1000),
                 "url": comment["html_url"],
                 "author": {
                     "name": sender["login"],
