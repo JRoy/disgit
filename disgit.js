@@ -247,7 +247,7 @@ function buildPullReviewComment(json) {
  * @return {string}
  */
 function buildPullReview(json) {
-    const { pull_request, review, repository, sender } = json;
+    const { pull_request, review, repository, action, sender } = json;
 
     let state = "reviewed";
     let color = 7829367;
@@ -263,6 +263,9 @@ function buildPullReview(json) {
             break;
         }
         default: {
+            if (action === "dismissed") {
+                state = "review dismissed";
+            }
             break;
         }
     }
