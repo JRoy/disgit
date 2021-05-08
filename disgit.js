@@ -9,9 +9,11 @@ addEventListener('fetch', function(event) {
 })
 
 async function handleRequest(request) {
-    if (request.headers.get("content-type").includes("application/json")) {
+    const event = request.headers.get("X-GitHub-Event");
+    const contentType = request.headers.get("content-type");
+    if (event != null && contentType != null && contentType.includes("application/json")) {
         let json = await request.json();
-        let embed = buildEmbed(json);
+        let embed = buildEmbed(json, event);
         if (embed == null) {
             return new Response('Webhook NO-OP', {status: 200})
         }
@@ -39,87 +41,102 @@ async function handleRequest(request) {
 
 /**
  * @param {*} json
+ * @param {string} event
  * @return {String|null}
  */
-function buildEmbed(json) {
+function buildEmbed(json, event) {
     const { action } = json;
 
-    if ("starred_at" in json && action === "created") {
-        return buildStar(json);
-    } else if ("check_run" in json && action === "completed") {
-        return buildCheck(json);
-    } else if ("ref_type" in json) {
-        if ("master_branch" in json) {
+    switch (event) {
+        case "check_run": {
+            return buildCheck(json);
+        }
+        case "commit_comment": {
+            return buildCommitComment(json);
+        }
+        case "create": {
             return buildCreateBranch(json);
         }
-        return buildDeleteBranch(json);
-    } else if ("discussion" in json && action === "created") {
-        if ("comment" in json) {
-            return buildDiscussionComment(json)
+        case "delete": {
+            return buildDeleteBranch(json);
         }
-        return buildDiscussion(json);
-    } else if ("forkee" in json) {
-        return buildFork(json);
-    } else if ("issue" in json) {
-        switch (action) {
-            case "opened": {
-                return buildIssue(json);
-            }
-            case "reopened": {
-                return buildIssueReOpen(json);
-            }
-            case "closed": {
-                return buildIssueClose(json);
-            }
-            case "created": {
-                return buildIssueComment(json);
-            }
-            default: {
-                return null;
-            }
+        case "discussion": {
+            return buildDiscussion(json);
         }
-    } else if ("pull_request" in json && "number" in json) {
-        switch (action) {
-            case "opened": {
-                return buildPull(json);
-            }
-            case "closed": {
-                return buildPullClose(json);
-            }
-            case "reopened": {
-                return buildPullReopen(json);
-            }
-            case "converted_to_draft": {
-                return buildPullDraft(json);
-            }
-            case "ready_for_review": {
-                return buildPullReadyReview(json);
-            }
-            default: {
-                return null;
+        case "discussion_comment": {
+            return buildDiscussionComment(json);
+        }
+        case "fork": {
+            return buildFork(json);
+        }
+        case "issue_comment": {
+            return buildIssueComment(json);
+        }
+        case "issues": {
+            switch (action) {
+                case "opened": {
+                    return buildIssue(json);
+                }
+                case "reopened": {
+                    return buildIssueReOpen(json);
+                }
+                case "closed": {
+                    return buildIssueClose(json);
+                }
+                default: {
+                    return null;
+                }
             }
         }
-    } else if ("pull_request" in json && "review" in json) {
-        switch (action) {
-            case "submitted":
-            case "dismissed": {
-                return buildPullReview(json);
-            }
-            default: {
-                return null;
+        case "ping": {
+            //TODO
+            return null;
+        }
+        case "pull_request": {
+            switch (action) {
+                case "opened": {
+                    return buildPull(json);
+                }
+                case "closed": {
+                    return buildPullClose(json);
+                }
+                case "reopened": {
+                    return buildPullReopen(json);
+                }
+                case "converted_to_draft": {
+                    return buildPullDraft(json);
+                }
+                case "ready_for_review": {
+                    return buildPullReadyReview(json);
+                }
+                default: {
+                    return null;
+                }
             }
         }
-    } else if ("comment" in json && "pull_request" in json && action === "created") {
-        return buildPullReviewComment(json);
-    } else if ("ref" in json && "commits" in json && "after" in json) {
-        return buildPush(json);
-    } else if ("release" in json && action === "published") {
-        return buildRelease(json);
-    }
-
-    // Needs to be last element due to common properties
-    else if ("comment" in json && action === "created") {
-        return buildCommitComment(json);
+        case "pull_request_review": {
+            switch (action) {
+                case "submitted":
+                case "dismissed": {
+                    return buildPullReview(json);
+                }
+                default: {
+                    return null;
+                }
+            }
+        }
+        case "pull_request_review_comment": {
+            return buildPullReviewComment(json);
+        }
+        case "push": {
+            return buildPush(json);
+        }
+        case "release": {
+            return buildRelease(json);
+        }
+        case "star": {
+            return buildStar(json);
+        }
     }
 
     return null;
