@@ -16,6 +16,7 @@ The following webhook events are supported as of now;
 * [issue_comment](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#issue_comment)
   * This event also send pull request comments...*sigh*
 * [issues](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#issues)
+* [ping](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#ping)
 * [pull_request](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#pull_request)
 * [pull_request_review](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#pull_request_review)
 * [pull_request_review_comment](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#pull_request_review_comment)

@@ -89,8 +89,7 @@ function buildEmbed(json, event) {
             }
         }
         case "ping": {
-            //TODO
-            return null;
+            return buildPing(json);
         }
         case "pull_request": {
             switch (action) {
@@ -140,6 +139,29 @@ function buildEmbed(json, event) {
     }
 
     return null;
+}
+
+/**
+ * @param {*} json
+ * @return {string}
+ */
+function buildPing(json) {
+    const { zen, hook, repository, sender } = json;
+
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": "[" + repository["full_name"] + "] " + hook["type"] + " hook ping received",
+                "description": zen,
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "color": 12118406
+            }
+        ]
+    });
 }
 
 /**
