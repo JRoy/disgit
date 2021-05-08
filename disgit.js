@@ -134,7 +134,10 @@ function buildEmbed(json, event) {
             return buildRelease(json);
         }
         case "star": {
-            return buildStar(json);
+            if (action === "created") {
+                return buildStar(json);
+            }
+            break;
         }
     }
 
