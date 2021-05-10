@@ -232,6 +232,10 @@ function buildPush(json) {
 
     let branch = ref.substring(11);
 
+    if (isIgnoredBranch(branch)) {
+        return null;
+    }
+
     if (forced) {
         return JSON.stringify({
             "embeds": [
@@ -739,6 +743,11 @@ function buildCheck(json) {
     }
 
     let target = check_suite["head_branch"];
+
+    if (isIgnoredBranch(target)) {
+        return null;
+    }
+
     if (check_suite["pull_requests"].length > 0) {
         let pull = check_suite["pull_requests"][0];
         if (pull["url"].startsWith("https://api.github.com/repos/" + repository["full_name"])) {
@@ -816,6 +825,20 @@ async function buildDebugPaste(embed) {
         "content": embed
     });
     return embed;
+}
+
+/**
+ * @param {String} branch
+ * @return {boolean}
+ */
+function isIgnoredBranch(branch) {
+    // noinspection JSUnresolvedVariable
+    if (typeof IGNORED_BRANCHES === 'undefined' || IGNORED_BRANCHES == null) {
+        return false;
+    }
+
+    // noinspection JSUnresolvedVariable
+    return IGNORED_BRANCHES.split(",").includes(branch);
 }
 
 /**
