@@ -797,10 +797,10 @@ async function buildDebugPaste(embed) {
 /**
  * @param {String} str
  * @param {Number} num
- * @return {string}
+ * @return {string|null}
  */
 function truncate(str, num) {
-    if (str.length <= num) {
+    if (str == null || str.length <= num) {
         return str;
     }
     return str.slice(0, num - 3) + "...";
