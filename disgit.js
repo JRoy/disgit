@@ -53,9 +53,15 @@ function buildEmbed(json, event) {
 
     switch (event) {
         case "check_run": {
+            if (action !== "completed") {
+                break;
+            }
             return buildCheck(json);
         }
         case "commit_comment": {
+            if (action !== "created") {
+                break;
+            }
             return buildCommitComment(json);
         }
         case "create": {
@@ -65,15 +71,24 @@ function buildEmbed(json, event) {
             return buildDeleteBranch(json);
         }
         case "discussion": {
+            if (action !== "created") {
+                break;
+            }
             return buildDiscussion(json);
         }
         case "discussion_comment": {
+            if (action !== "created") {
+                break;
+            }
             return buildDiscussionComment(json);
         }
         case "fork": {
             return buildFork(json);
         }
         case "issue_comment": {
+            if (action !== "created") {
+                break;
+            }
             return buildIssueComment(json);
         }
         case "issues": {
@@ -129,19 +144,25 @@ function buildEmbed(json, event) {
             }
         }
         case "pull_request_review_comment": {
+            if (action !== "created") {
+                break;
+            }
             return buildPullReviewComment(json);
         }
         case "push": {
             return buildPush(json);
         }
         case "release": {
-            return buildRelease(json);
-        }
-        case "star": {
-            if (action === "created") {
-                return buildStar(json);
+            if (action === "released" || action === "prereleased") {
+                return buildRelease(json);
             }
             break;
+        }
+        case "star": {
+            if (action !== "created") {
+                break;
+            }
+            return buildStar(json);
         }
     }
 
