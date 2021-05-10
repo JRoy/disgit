@@ -740,7 +740,10 @@ function buildCheck(json) {
 
     let target = check_suite["head_branch"];
     if (check_suite["pull_requests"].length > 0) {
-        target = "pull request #" + check_suite["pull_requests"][0]["number"]
+        let pull = check_suite["pull_requests"][0];
+        if (pull["url"].startsWith("https://api.github.com/repos/" + repository["full_name"])) {
+            target = "pull request #" + pull["number"]
+        }
     }
 
     let color = 11184810;
