@@ -264,7 +264,7 @@ function buildPush(json) {
     for (let i = 0; i < commits.length; i++) {
         let commit = commits[i];
         let commitUrl = commit["url"];
-        let line = "[`" + shortCommit(commit["id"]) + "`](" +commitUrl + ") " + truncate(commit["message"], 50) + " - " + commit["author"]["username"] + "\n";
+        let line = "[`" + shortCommit(commit["id"]) + "`](" +commitUrl + ") " + truncate(commit["message"].split("\n")[0], 50) + " - " + commit["author"]["username"] + "\n";
         if (description.length + line.length >= 1500) {
             break;
         }
