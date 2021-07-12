@@ -847,7 +847,7 @@ function isIgnoredBranch(branch) {
  * @return {string|null}
  */
 function truncate(str, num) {
-    str = str.replace(/<!--((.|\n)*?)-->/g, "");
+    str = str.replace(/<!--(?:.|\n|\r)*?-->[\n|\r]*/g, "");
     if (str == null || str.length <= num) {
         return str;
     }
