@@ -164,6 +164,15 @@ function buildEmbed(json, event) {
             }
             return buildStar(json);
         }
+        case "deployment": {
+            if (action !== "created") {
+                break;
+            }
+            return buildDeployment(json);
+        }
+        case "deployment_status": {
+            return buildDeploymentStatus(json);
+        }
     }
 
     return null;
@@ -799,6 +808,76 @@ function buildStar(json) {
         ]
     });
 }
+
+/**
+ * @param {*} json
+ * @return {string}
+ */
+function buildDeployment(json) {
+    const { deployment, repository, sender } = json;
+    const { description, payload } = deployment;
+
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": "[" + repository["full_name"] + "] Deployment started for " + description,
+                "url": payload["web_url"] === null ? "" : payload["web_url"],
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "color": 11158713
+            }
+        ]
+    });
+}
+
+/**
+ * @param {*} json
+ * @return {string|null}
+ */
+function buildDeploymentStatus(json) {
+    const { deployment, deployment_status, repository, sender } = json;
+    const { description, payload } = deployment;
+    const { status } = deployment_status;
+
+    let color = 16726843;
+    let term = "succeeded";
+    switch (status) {
+        case "success": {
+            color = 45866;
+            break;
+        }
+        case "failure": {
+            term = "failed"
+            break;
+        }
+        case "error": {
+            term = "errored"
+            break;
+        }
+        default: {
+            return null;
+        }
+    }
+
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": "[" + repository["full_name"] + "] Deployment for " + description + " " + term,
+                "url": payload["web_url"] === null ? "" : payload["web_url"],
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "color": color
+            }
+        ]
+    });
+}
+
 
 async function buildDebugPaste(embed) {
     embed = JSON.stringify({
