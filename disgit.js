@@ -744,7 +744,7 @@ function buildCommitComment(json) {
  * @return {string|null}
  */
 function buildCheck(json) {
-    const { check_run, repository } = json;
+    const { check_run, repository, sender } = json;
     const { conclusion, html_url, check_suite } = check_run;
 
     if (repository == null || check_suite["head_branch"] == null) {
@@ -780,7 +780,12 @@ function buildCheck(json) {
             {
                 "title": "[" + repository["name"] + "] Actions check(s) " + status + " on " + target,
                 "url": html_url,
-                "color": color
+                "color": color,
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
             }
         ]
     });
