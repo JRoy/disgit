@@ -845,11 +845,11 @@ function buildDeployment(json) {
 function buildDeploymentStatus(json) {
     const { deployment, deployment_status, repository, sender } = json;
     const { description, payload } = deployment;
-    const { status } = deployment_status;
+    const { state } = deployment_status;
 
     let color = 16726843;
     let term = "succeeded";
-    switch (status) {
+    switch (state) {
         case "success": {
             color = 45866;
             break;
