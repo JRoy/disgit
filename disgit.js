@@ -470,10 +470,14 @@ function buildPullClose(json) {
 
 /**
  * @param {*} json
- * @return {string}
+ * @return {string|null}
  */
 function buildPull(json) {
     const { pull_request, repository, sender } = json;
+
+    if (isIgnoredUser(sender["login"])) {
+        return null;
+    }
 
     let draft = pull_request["draft"];
     let color = draft ? 10987431 : 37378;
@@ -498,10 +502,14 @@ function buildPull(json) {
 
 /**
  * @param {*} json
- * @return {string}
+ * @return {string|null}
  */
 function buildIssueComment(json) {
     const { issue, comment, repository, sender } = json;
+
+    if (isIgnoredUser(sender["login"])) {
+        return null;
+    }
 
     let entity = "pull_request" in issue ? "pull request" : "issue";
 
@@ -570,10 +578,14 @@ function buildIssueReOpen(json) {
 
 /**
  * @param {*} json
- * @return {string}
+ * @return {string|null}
  */
 function buildIssue(json) {
     const { issue, repository, sender } = json;
+
+    if (isIgnoredUser(sender["login"])) {
+        return null;
+    }
 
     return JSON.stringify({
         "embeds": [
@@ -617,11 +629,15 @@ function buildFork(json) {
 
 /**
  * @param {*} json
- * @return {string}
+ * @return {string|null}
  */
 function buildDiscussionComment(json) {
     const { discussion, comment, repository, sender } = json;
     const { category } = discussion;
+
+    if (isIgnoredUser(sender["login"])) {
+        return null;
+    }
 
     return JSON.stringify({
         "embeds": [
@@ -645,11 +661,15 @@ function buildDiscussionComment(json) {
 
 /**
  * @param {*} json
- * @return {string}
+ * @return {string|null}
  */
 function buildDiscussion(json) {
     const { discussion, repository, sender } = json;
     const { category } = discussion;
+
+    if (isIgnoredUser(sender["login"])) {
+        return null;
+    }
 
     return JSON.stringify({
         "embeds": [
@@ -717,10 +737,14 @@ function buildCreateBranch(json) {
 
 /**
  * @param {*} json
- * @return {string}
+ * @return {string|null}
  */
 function buildCommitComment(json) {
     const { sender, comment, repository } = json;
+
+    if (isIgnoredUser(sender["login"])) {
+        return null;
+    }
 
     return JSON.stringify({
         "embeds": [
@@ -923,6 +947,20 @@ function isIgnoredBranch(branch) {
 
     // noinspection JSUnresolvedVariable
     return IGNORED_BRANCHES.split(",").includes(branch);
+}
+
+/**
+ * @param {String} user
+ * @return {boolean}
+ */
+function isIgnoredUser(user) {
+    // noinspection JSUnresolvedVariable
+    if (typeof IGNORED_USERS === 'undefined' || IGNORED_USERS == null) {
+        return false;
+    }
+
+    // noinspection JSUnresolvedVariable
+    return IGNORED_USERS.split(",").includes(user);
 }
 
 /**
