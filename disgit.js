@@ -802,7 +802,7 @@ function buildCheck(json) {
     return JSON.stringify({
         "embeds": [
             {
-                "title": "[" + repository["name"] + "] Actions check(s) " + status + " on " + target,
+                "title": "[" + repository["full_name"] + "] Actions check " + status + " on " + target,
                 "url": html_url,
                 "color": color,
                 "author": {
