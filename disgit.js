@@ -769,7 +769,7 @@ function buildCommitComment(json) {
  */
 function buildCheck(json) {
     const { check_run, repository, sender } = json;
-    const { conclusion, html_url, check_suite } = check_run;
+    const { conclusion, output, html_url, check_suite } = check_run;
 
     if (repository == null || check_suite["head_branch"] == null) {
         return null;
@@ -784,7 +784,7 @@ function buildCheck(json) {
     if (check_suite["pull_requests"].length > 0) {
         let pull = check_suite["pull_requests"][0];
         if (pull["url"].startsWith("https://api.github.com/repos/" + repository["full_name"])) {
-            target = "pull request #" + pull["number"]
+            target = "PR #" + pull["number"]
         }
     }
 
@@ -795,8 +795,12 @@ function buildCheck(json) {
         status = "succeeded"
     } else if (conclusion === "failure" || conclusion === "cancelled") {
         color = 16726843;
+        status = conclusion === "failure" ? "failed" : "cancelled"
     } else if (conclusion === "timed_out" || conclusion === "action_required" || conclusion === "stale") {
-        color = 14984995;
+        color = 14984995
+        status = conclusion === "timed_out" ? "timed out" : (conclusion === "action_required" ? "requires action" : "became stale")
+    } else if (conclusion === "neutral") {
+        status = "didn't run"
     }
 
     return JSON.stringify({
@@ -805,6 +809,23 @@ function buildCheck(json) {
                 "title": "[" + repository["full_name"] + "] Actions check " + status + " on " + target,
                 "url": html_url,
                 "color": color,
+                "fields": [
+                    {
+                        "name": "Action Name",
+                        "value": check_run["name"],
+                        "inline": true
+                    },
+                    {
+                        "name": "Output Title",
+                        "value": output["title"],
+                        "inline": true
+                    },
+                    {
+                        "name": "Output Summary",
+                        "value": output["summary"],
+                        "inline": false
+                    }
+                ],
                 "author": {
                     "name": sender["login"],
                     "url": sender["html_url"],
