@@ -803,29 +803,35 @@ function buildCheck(json) {
         status = "didn't run"
     }
 
+    let fields = [
+        {
+            "name": "Action Name",
+            "value": check_run["name"],
+            "inline": true
+        }
+    ];
+
+    if (output["title"] != null) {
+        fields.push({
+            "name": "Output Title",
+            "value": output["title"],
+            "inline": true });
+    }
+
+    if (output["summary"] != null) {
+        fields.push({
+            "name": "Output Summary",
+            "value": output["summary"],
+            "inline": false});
+    }
+
     return JSON.stringify({
         "embeds": [
             {
                 "title": "[" + repository["full_name"] + "] Actions check " + status + " on " + target,
                 "url": html_url,
                 "color": color,
-                "fields": [
-                    {
-                        "name": "Action Name",
-                        "value": check_run["name"],
-                        "inline": true
-                    },
-                    {
-                        "name": "Output Title",
-                        "value": output["title"],
-                        "inline": true
-                    },
-                    {
-                        "name": "Output Summary",
-                        "value": output["summary"],
-                        "inline": false
-                    }
-                ],
+                "fields": fields,
                 "author": {
                     "name": sender["login"],
                     "url": sender["html_url"],
