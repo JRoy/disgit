@@ -979,15 +979,15 @@ function buildWiki(json) {
     if (created === 1 && edited === 0) {
         message = "A page was created";
         // Set the color to green.
-        color = 16777215;
+        color = 45866;
     } else if (created === 0 && edited === 1) {
         message = "A page was edited";
-        // Set the color to blue.
-        color = 16777215;
+        // Set the color to orange.
+        color = 16562432;
     } else {
         message = "Multiple pages were created and edited";
-        // Set the color to orange.
-        color = 16777215;
+        // Set the color to blue.
+        color = 6120164;
     }
 
     // Prepend the repository title to the message.
