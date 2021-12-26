@@ -792,15 +792,17 @@ function buildCheck(json) {
     let status = "failed"
     if (conclusion === "success") {
         color = 45866;
-        status = "succeeded"
+        status = "succeeded";
     } else if (conclusion === "failure" || conclusion === "cancelled") {
         color = 16726843;
         status = conclusion === "failure" ? "failed" : "cancelled"
     } else if (conclusion === "timed_out" || conclusion === "action_required" || conclusion === "stale") {
-        color = 14984995
-        status = conclusion === "timed_out" ? "timed out" : (conclusion === "action_required" ? "requires action" : "became stale")
+        color = 14984995;
+        status = conclusion === "timed_out" ? "timed out" : (conclusion === "action_required" ? "requires action" : "became stale");
     } else if (conclusion === "neutral") {
-        status = "didn't run"
+        status = "didn't run";
+    } else if (conclusion === "skipped") {
+        status = "was skipped";
     }
 
     let fields = [
