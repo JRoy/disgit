@@ -15,6 +15,7 @@ The following webhook events are supported as of now;
 * [discussion_comment](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#discussion_comment)
   * Event is invite-only (at time of writing) and needs to be manually selected in webhook settings
 * [fork](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#fork)
+* [gollum](https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#gollum) (wiki)
 * [issue_comment](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#issue_comment)
   * This event also send pull request comments...*sigh*
 * [issues](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#issues)
