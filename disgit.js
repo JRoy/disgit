@@ -985,7 +985,11 @@ function buildWiki(json) {
         // Set the color to orange.
         color = 16562432;
     } else {
-        message = "Multiple pages were created and edited";
+        if (created > 0 && edited > 0) {
+            message = created + " page" + (created > 1 ? "s" : "") + " were created and " + edited + " " + (edited > 1 ? "were" : "was") + " edited";
+        } else {
+            message = Math.max(created, edited) + " pages were " + (created > 0 ? "created" : "edited");
+        }
         // Set the color to blue.
         color = 6120164;
     }
