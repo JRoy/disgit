@@ -173,6 +173,10 @@ function buildEmbed(json, event) {
         case "deployment_status": {
             return buildDeploymentStatus(json);
         }
+        // Wiki
+        case "gollum": {
+            return buildWiki(json);
+        }
     }
 
     return null;
@@ -936,6 +940,82 @@ function buildDeploymentStatus(json) {
     });
 }
 
+/**
+ * @param {*} json
+ * @return {string|null}
+ */
+function buildWiki(json) {
+    const { pages, sender, repository } = json;
+
+    // Pages is always an array with several "actions".
+    // Count the amount of "created" and "edited" actions and store the amount in a variable.
+    // Also store the titles of the pages in an array since we will need them later.
+    let created = 0;
+    let edited = 0;
+    let titles = [];
+    for (let i = 0; i < pages.length; i++) {
+        const { action } = pages[i];
+        if (action === "created") {
+            created++;
+        } else if (action === "edited") {
+            edited++;
+        }
+
+        // Wrap the title in a markdown with the link to the page.
+        let title = "[" + pages[i]["title"] + "](" + pages[i]["html_url"] + ")";
+
+        // Capitalize the first letter of the action, then prepend it to the title.
+        titles.push(action.charAt(0).toUpperCase() + action.slice(1) + ": " + title);
+    }
+
+    // If there are no pages, return null.
+    if (created === 0 && edited === 0) {
+        return null;
+    }
+
+    // Set the message based on if there are any created or edited pages.
+    // If there are only 1 of one type, set the message to singular.
+    // If there are multiple of one type, set the message to plural.
+    let message;
+    let color;
+    if (created === 1 && edited === 0) {
+        message = "A page was created";
+        // Set the color to green.
+        color = 45866;
+    } else if (created === 0 && edited === 1) {
+        message = "A page was edited";
+        // Set the color to orange.
+        color = 16562432;
+    } else {
+        if (created > 0 && edited > 0) {
+            message = created + " page" + (created > 1 ? "s" : "") + " were created and " + edited + " " + (edited > 1 ? "were" : "was") + " edited";
+        } else {
+            message = Math.max(created, edited) + " pages were " + (created > 0 ? "created" : "edited");
+        }
+        // Set the color to blue.
+        color = 6120164;
+    }
+
+    // Prepend the repository title to the message.
+    message = "[" + repository["full_name"] + "] " + message;
+
+    // Build the embed, with the sender as the author, the message as the title, and the edited pages as the description.
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": message,
+                "url": repository["html_url"],
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "description": titles.join("\n"),
+                "color": color
+            }
+        ]
+    });
+}
 
 async function buildDebugPaste(embed) {
     embed = JSON.stringify({
