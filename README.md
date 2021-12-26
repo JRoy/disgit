@@ -4,7 +4,6 @@ A cloudflare worker script which provides better github->discord webhooks than t
 ## Supported Events
 The following webhook events are supported as of now;
 * [check_run](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#check_run)
-  * Everything other than check success is marked as a failure 
 * [commit_comment](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#commit_comment)
 * [create](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#create)
 * [delete](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#delete)
@@ -16,7 +15,7 @@ The following webhook events are supported as of now;
   * Event is invite-only (at time of writing) and needs to be manually selected in webhook settings
 * [fork](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#fork)
 * [issue_comment](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#issue_comment)
-  * This event also send pull request comments...*sigh*
+  * This event also sends pull request comments...*sigh*
 * [issues](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#issues)
 * [ping](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#ping)
 * [pull_request](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#pull_request)
