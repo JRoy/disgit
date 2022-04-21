@@ -254,7 +254,7 @@ function buildPush(json) {
             "embeds": [
                 {
                     "title": "[" + repository["full_name"] + "] Branch " + branch +  " was force-pushed to `" + shortCommit(after) + "`",
-                    "url": compare,
+                    "url": compare.replace("...", ".."),
                     "author": {
                         "name": sender["login"],
                         "url": sender["html_url"],
