@@ -107,6 +107,19 @@ function buildEmbed(json, event) {
                 }
             }
         }
+        case "package": {
+            switch (action) {
+                case "published": {
+                    return buildPackagePublished(json);
+                }
+                case "updated": {
+                    return buildPackageUpdated(json);
+                }
+                default: {
+                    return null;
+                }
+            }
+        }
         case "ping": {
             return buildPing(json);
         }
@@ -603,6 +616,52 @@ function buildIssue(json) {
                     "icon_url": sender["avatar_url"]
                 },
                 "color": 16743680
+            }
+        ]
+    });
+}
+
+/**
+ * @param {*} json
+ * @return {string}
+ */
+function buildPackagePublished(json) {
+    const { sender, repository, package } = json;
+
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": "[" + repository["full_name"] + "] Package Published: " + package["namespace"] + "/" + package["name"],
+                "url": package["package_version"]["html_url"],
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "color": 37378
+            }
+        ]
+    });
+}
+
+/**
+ * @param {*} json
+ * @return {string}
+ */
+function buildPackageUpdated(json) {
+    const { sender, repository, package } = json;
+
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": "[" + repository["full_name"] + "] Package Updated: " + package["namespace"] + "/" + package["name"],
+                "url": package["package_version"]["html_url"],
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "color": 37378
             }
         ]
     });
