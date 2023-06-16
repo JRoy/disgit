@@ -284,11 +284,12 @@ function buildPush(json) {
         lastCommitUrl = commitUrl;
         description += line;
     }
+    const commitWord = amount === 1 ? "commit" : "commits";
 
     return JSON.stringify({
         "embeds": [
             {
-                "title": "[" + repository["name"] + ":" + branch + "] " + amount + " new commits",
+                "title": "[" + repository["name"] + ":" + branch + "] " + amount + ` new ${commitWword}`,
                 "description": description,
                 "url": amount === 1 ? lastCommitUrl : compare,
                 "author": {
