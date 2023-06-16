@@ -38,7 +38,7 @@ The following webhook events are supported as of now;
    * For example if you had the worker url `https://my-worker.test.workers.dev` and the discord webhook url 
      `https://discord.com/api/webhooks/840438712203557422/8H3D57RQzftJmhw9VfEaLFLABjItuDScjU-c_nYKffb1hTlktLapwd`,
      the payload url you should have in the GitHub webhook form is 
-     `https://my-worker.test.workers.dev./840438712203557422/8H3D57RQzftJmhw9VfEaLFLABjItuDScjU-c_nYKffb1hTlktLapwd`.
+     `https://my-worker.test.workers.dev/840438712203557422/8H3D57RQzftJmhw9VfEaLFLABjItuDScjU-c_nYKffb1hTlktLapwd`.
 1. Set the `Content type` to `application/json`
 1. You can configure the events to whichever you would like to receive. *Remember that some events require you to
    explicitly pick them in "`Let me select individual events`" and will not send with the "`Send my everything`"
