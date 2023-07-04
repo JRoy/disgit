@@ -1,10 +1,6 @@
 import {BoundEnv, Env} from './env';
 import {shortCommit, truncate} from './util';
 
-// originally from
-// https://github.com/JRoy/disgit/blob/3fbe31415f4aaabb4510d17dd7f9029b95218770/disgit.js
-// heavily modified and wrangler-ified
-
 // If true, will send paste of embed json to discord for debugging
 const debug = false;
 
@@ -62,6 +58,10 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
  */
 function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
     const { action } = json;
+
+    if (env.isIgnoredPayload(event)) {
+        return null;
+    }
 
     switch (event) {
         case "check_run": {

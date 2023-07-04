@@ -5,6 +5,7 @@ export interface Env {
     IGNORED_BRANCHES_REGEX: string;
     IGNORED_BRANCHES: string;
     IGNORED_USERS: string;
+    IGNORED_PAYLOADS: string;
 
     PASTE_GG_API_KEY: string;
     GITHUB_WEBHOOK_SECRET: string;
@@ -17,6 +18,7 @@ export class BoundEnv {
     private ignoredBranchPattern?: RegExp;
     private ignoredBranches: string[];
     private ignoredUsers: string[];
+    private ignoredPayloads: string[];
     private readonly pasteGgApiKey: string;
     readonly githubWebhookSecret: string;
 
@@ -26,6 +28,7 @@ export class BoundEnv {
         }
         this.ignoredBranches = env.IGNORED_BRANCHES?.split(",") || [];
         this.ignoredUsers = env.IGNORED_USERS?.split(",") || [];
+        this.ignoredPayloads = env.IGNORED_PAYLOADS?.split(",") || [];
         this.pasteGgApiKey = env.PASTE_GG_API_KEY;
         this.githubWebhookSecret = env.GITHUB_WEBHOOK_SECRET;
     }
@@ -44,6 +47,14 @@ export class BoundEnv {
      */
     isIgnoredUser(user: string): boolean {
         return this.ignoredUsers.includes(user);
+    }
+
+    /**
+     * @param {String} payload
+     * @return {boolean}
+     */
+    isIgnoredPayload(payload: string): boolean {
+        return this.ignoredPayloads.includes(payload);
     }
 
     async buildDebugPaste(embed: any): Promise<string> {
