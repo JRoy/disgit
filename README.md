@@ -1,5 +1,5 @@
 # disgit
-A cloudflare worker script which provides better github->discord webhooks than the built in discord webhook executor.
+A Cloudflare Worker which provides better GitHub->Discord webhook integration than the built-in Discord webhook executor.
 
 ## Supported Events
 The following webhook events are supported as of now;
