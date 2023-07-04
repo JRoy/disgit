@@ -119,6 +119,19 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
                 }
             }
         }
+        case "package": {
+            switch (action) {
+                case "published": {
+                    return buildPackagePublished(json);
+                }
+                case "updated": {
+                    return buildPackageUpdated(json);
+                }
+                default : {
+                    return null;
+                }
+            }
+        }
         case "ping": {
             return buildPing(json);
         }
@@ -624,6 +637,54 @@ function buildIssue(json: any, env: BoundEnv): string | null {
                     "icon_url": sender["avatar_url"]
                 },
                 "color": 16743680
+            }
+        ]
+    });
+}
+
+/**
+ * @param {*} json
+ * @return {string}
+ */
+function buildPackagePublished(json: any) {
+    const { sender, repository } = json;
+    const pkg = "package" in json ? json["package"] : json["registry_package"];
+
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": "[" + repository["full_name"] + "] Package Published: " + pkg["namespace"] + "/" + pkg["name"],
+                "url": pkg["package_version"]["html_url"],
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "color": 37378
+            }
+        ]
+    });
+}
+
+/**
+ * @param {*} json
+ * @return {string}
+ */
+function buildPackageUpdated(json: any) {
+    const { sender, repository } = json;
+    const pkg = "package" in json ? json["package"] : json["registry_package"];
+
+    return JSON.stringify({
+        "embeds": [
+            {
+                "title": "[" + repository["full_name"] + "] Package Updated: " + pkg["namespace"] + "/" + pkg["name"],
+                "url": pkg["package_version"]["html_url"],
+                "author": {
+                    "name": sender["login"],
+                    "url": sender["html_url"],
+                    "icon_url": sender["avatar_url"]
+                },
+                "color": 37378
             }
         ]
     });
