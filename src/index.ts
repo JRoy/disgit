@@ -233,6 +233,7 @@ function buildPing(json: any) {
         ]
     });
 }
+
 /**
  * @param {*} json
  * @return {string|null}
