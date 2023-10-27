@@ -212,12 +212,16 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
  * @return {string}
  */
 function buildPing(json: any) {
-    const { zen, hook, repository, sender } = json;
+    const { zen, hook, repository, sender, organization } = json;
+
+    const isOrg = hook['type'] == 'Organization';
+
+    const name = isOrg ? organization['login'] : repository['full_name'];
 
     return JSON.stringify({
         "embeds": [
             {
-                "title": "[" + repository["full_name"] + "] " + hook["type"] + " hook ping received",
+                "title": "[" + name + "] " + hook["type"] + " hook ping received",
                 "description": zen,
                 "author": {
                     "name": sender["login"],
