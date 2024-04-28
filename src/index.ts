@@ -31,7 +31,7 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
         }
 
         const url = new URL(request.url)
-        let [hookId, hookToken] = url.pathname.substring(1).split("/");
+        let [hookId, hookToken] = (url.pathname + url.search).substring(1).split("/");
 
         if (typeof(hookToken) == 'undefined') {
             return new Response('Missing Webhook Authorization', { status: 400 });
