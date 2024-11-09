@@ -50,12 +50,6 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
     }
 }
 
-/**
- * @param {*} json
- * @param {string} event
- * @param {BoundEnv} env
- * @return {String|null}
- */
 function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
     const { action } = json;
 
@@ -207,11 +201,7 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
     return null;
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPing(json: any) {
+function buildPing(json: any): string {
     const { zen, hook, repository, sender, organization } = json;
 
     const isOrg = hook['type'] == 'Organization';
@@ -234,11 +224,7 @@ function buildPing(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string|null}
- */
-function buildRelease(json: any) {
+function buildRelease(json: any): string | null {
     const { release, repository, sender } = json;
     const { draft, name, tag_name, body, html_url, prerelease } = release;
 
@@ -265,12 +251,7 @@ function buildRelease(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
-function buildPush(json: any, env: BoundEnv) {
+function buildPush(json: any, env: BoundEnv): string | null {
     const { commits, forced, after, repository, ref, compare, sender } = json;
 
     let branch = ref.substring(11);
@@ -337,11 +318,7 @@ function buildPush(json: any, env: BoundEnv) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPullReviewComment(json: any) {
+function buildPullReviewComment(json: any): string {
     const { pull_request, comment, repository, sender } = json;
 
     return JSON.stringify({
@@ -361,11 +338,7 @@ function buildPullReviewComment(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPullReview(json: any) {
+function buildPullReview(json: any): string {
     const { pull_request, review, repository, action, sender } = json;
 
     let state = "reviewed";
@@ -429,11 +402,7 @@ function buildPullReadyReview(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPullDraft(json: any) {
+function buildPullDraft(json: any): string {
     const { pull_request, repository, sender } = json;
 
     return JSON.stringify({
@@ -452,12 +421,7 @@ function buildPullDraft(json: any) {
     });
 }
 
-
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPullReopen(json: any) {
+function buildPullReopen(json: any): string {
     const { pull_request, repository, sender } = json;
 
     let draft = pull_request["draft"];
@@ -480,11 +444,7 @@ function buildPullReopen(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPullClose(json: any) {
+function buildPullClose(json: any): string {
     const { pull_request, repository, sender } = json;
 
     let merged = pull_request["merged"];
@@ -507,12 +467,7 @@ function buildPullClose(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
-function buildPull(json: any, env: BoundEnv) {
+function buildPull(json: any, env: BoundEnv): string | null {
     const { pull_request, repository, sender } = json;
 
     if (env.isIgnoredUser(sender["login"])) {
@@ -540,12 +495,7 @@ function buildPull(json: any, env: BoundEnv) {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
-function buildIssueComment(json: any, env: BoundEnv) {
+function buildIssueComment(json: any, env: BoundEnv): string | null {
     const { issue, comment, repository, sender } = json;
 
     if (env.isIgnoredUser(sender["login"])) {
@@ -571,11 +521,7 @@ function buildIssueComment(json: any, env: BoundEnv) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildIssueClose(json: any) {
+function buildIssueClose(json: any): string {
     const { issue, repository, sender } = json;
 
     return JSON.stringify({
@@ -594,10 +540,6 @@ function buildIssueClose(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
 function buildIssueReOpen(json: any): string {
     const { issue, repository, sender } = json;
 
@@ -617,11 +559,6 @@ function buildIssueReOpen(json: any): string {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
 function buildIssue(json: any, env: BoundEnv): string | null {
     const { issue, repository, sender } = json;
 
@@ -646,11 +583,7 @@ function buildIssue(json: any, env: BoundEnv): string | null {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPackagePublished(json: any) {
+function buildPackagePublished(json: any): string {
     const { sender, repository } = json;
     const pkg = "package" in json ? json["package"] : json["registry_package"];
 
@@ -670,11 +603,7 @@ function buildPackagePublished(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildPackageUpdated(json: any) {
+function buildPackageUpdated(json: any): string {
     const { sender, repository } = json;
     const pkg = "package" in json ? json["package"] : json["registry_package"];
 
@@ -694,11 +623,7 @@ function buildPackageUpdated(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
-function buildFork(json: any) {
+function buildFork(json: any): string {
     const { sender, repository, forkee } = json;
 
     return JSON.stringify({
@@ -717,11 +642,6 @@ function buildFork(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
 function buildDiscussionComment(json: any, env: BoundEnv): string | null {
     const { discussion, comment, repository, sender } = json;
     const { category } = discussion;
@@ -750,11 +670,6 @@ function buildDiscussionComment(json: any, env: BoundEnv): string | null {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
 function buildDiscussion(json: any, env: BoundEnv): string | null {
     const { discussion, repository, sender } = json;
     const { category } = discussion;
@@ -783,11 +698,6 @@ function buildDiscussion(json: any, env: BoundEnv): string | null {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string}
- */
 function buildDeleteBranch(json: any, env: BoundEnv): string | null {
     const { ref, ref_type, repository, sender } = json;
 
@@ -811,11 +721,6 @@ function buildDeleteBranch(json: any, env: BoundEnv): string | null {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string}
- */
 function buildCreateBranch(json: any, env: BoundEnv): string | null {
     const { ref, ref_type, repository, sender } = json;
 
@@ -842,11 +747,6 @@ function buildCreateBranch(json: any, env: BoundEnv): string | null {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
 function buildCommitComment(json: any, env: BoundEnv): string | null {
     const { sender, comment, repository } = json;
 
@@ -871,11 +771,6 @@ function buildCommitComment(json: any, env: BoundEnv): string | null {
     });
 }
 
-/**
- * @param {*} json
- * @param {BoundEnv} env
- * @return {string|null}
- */
 function buildCheck(json: any, env: BoundEnv): string | null {
     const { check_run, repository, sender } = json;
     const { conclusion, output, html_url, check_suite } = check_run;
@@ -953,10 +848,6 @@ function buildCheck(json: any, env: BoundEnv): string | null {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
 function buildStar(json: any): string {
     const { sender, repository } = json;
 
@@ -976,10 +867,6 @@ function buildStar(json: any): string {
     });
 }
 
-/**
- * @param {*} json
- * @return {string}
- */
 function buildDeployment(json: any) {
     const { deployment, repository, sender } = json;
     const { description, payload } = deployment;
@@ -1000,10 +887,6 @@ function buildDeployment(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string|null}
- */
 function buildDeploymentStatus(json: any) {
     const { deployment, deployment_status, repository, sender } = json;
     const { description, payload } = deployment;
@@ -1045,10 +928,6 @@ function buildDeploymentStatus(json: any) {
     });
 }
 
-/**
- * @param {*} json
- * @return {string|null}
- */
 function buildWiki(json: any): string | null {
     const { pages, sender, repository } = json;
 
@@ -1122,11 +1001,6 @@ function buildWiki(json: any): string | null {
     });
 }
 
-/**
- * Responds with an uncaught error.
- * @param error
- * @returns {Response}
- */
 function handleError(error: any): Response {
     console.error('Uncaught error:', error)
 
