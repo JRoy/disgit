@@ -12,6 +12,5 @@ IGNORED_USERS=""
 IGNORED_PAYLOADS=""
 
 # Uses secrets:
-# - PASTE_GG_API_KEY
 # - GITHUB_WEBHOOK_SECRET
 # Run `echo <VALUE> | wrangler secret put <NAME>` for each of these

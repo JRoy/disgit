@@ -7,7 +7,6 @@ export interface Env {
     IGNORED_USERS: string;
     IGNORED_PAYLOADS: string;
 
-    PASTE_GG_API_KEY: string;
     GITHUB_WEBHOOK_SECRET: string;
 }
 
@@ -19,7 +18,6 @@ export class BoundEnv {
     private ignoredBranches: string[];
     private ignoredUsers: string[];
     private ignoredPayloads: string[];
-    private readonly pasteGgApiKey: string;
     readonly githubWebhookSecret: string;
 
     constructor(env: Env) {
@@ -29,7 +27,6 @@ export class BoundEnv {
         this.ignoredBranches = env.IGNORED_BRANCHES?.split(",") || [];
         this.ignoredUsers = env.IGNORED_USERS?.split(",") || [];
         this.ignoredPayloads = env.IGNORED_PAYLOADS?.split(",") || [];
-        this.pasteGgApiKey = env.PASTE_GG_API_KEY;
         this.githubWebhookSecret = env.GITHUB_WEBHOOK_SECRET;
     }
 
@@ -69,11 +66,10 @@ export class BoundEnv {
             ]
         });
 
-        embed = await (await fetch("https://api.paste.gg/v1/pastes", {
+        embed = await (await fetch("https://api.pastes.dev/post", {
             headers: {
                 "user-agent": "disgit",
                 "content-type": "application/json",
-                "Authorization": `Key ${this.pasteGgApiKey}`
             },
             method: "POST",
             body: embed
