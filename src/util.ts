@@ -35,3 +35,9 @@ export async function validateRequest(request: Request, secret: string): Promise
 
     return crypto.subtle.verify("HMAC", key, encoder.encode(signatureHeader), await request.arrayBuffer())
 }
+
+export type Sender = {
+    login: string;
+    html_url: string;
+    avatar_url: string;
+}
