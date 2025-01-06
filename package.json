@@ -14,7 +14,9 @@
     "wrangler": "^3.99.0"
   },
   "scripts": {
-    "start": "wrangler dev",
+    "build": "selflare compile",
+    "start": "wrangler dev src/index.ts --local=true",
+    "docker": "wrangler dev index.ts --local=true",
     "deploy": "wranger deploy",
     "check": "tsc"
   }

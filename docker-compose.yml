@@ -1,0 +1,13 @@
+services:
+    worker:
+        build: .
+        image: worker
+        environment:
+            - IGNORED_BRANCH_REGEX=${IGNORED_BRANCH_REGEX}
+            - IGNORED_BRANCHES=${IGNORED_BRANCHES}
+            - IGNORED_USERS=${IGNORED_USERS}
+            - IGNORED_PAYLOADS=${IGNORED_PAYLOADS}
+        volumes:
+            - ./.storage/cache:/worker/cache
+        ports:
+            - "8080:8080"
