@@ -1,0 +1,33 @@
+name: Publish
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Publish
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate tag
+        id: tag
+        run: |
+          ts=$(date +%s)
+          branch=${GITHUB_REF##*/}
+          echo "IMAGE_ID=${branch}-${GITHUB_SHA::8}-${ts}" >> "$GITHUB_OUTPUT"
+      - name: Publish Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/jroy/disgit:latest
+            ghcr.io/jroy/disgit:${{ steps.tag.outputs.IMAGE_ID }}
