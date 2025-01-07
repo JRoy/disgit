@@ -810,6 +810,11 @@ export default {
         env: Env,
         ctx: ExecutionContext
     ): Promise<Response> {
+        const url = new URL(request.url)
+        if (url.pathname === "/health") {
+            return new Response("OK", { status: 200 });
+        }
+
         const bound = new BoundEnv(env);
         return handleRequest(request, bound).catch(handleError);
     },

@@ -13,6 +13,9 @@
     "typescript": "^5.7.2",
     "wrangler": "^3.99.0"
   },
+  "devDependencies": {
+    "selflare": "^1.1.2"
+  },
   "scripts": {
     "build": "selflare compile",
     "start": "wrangler dev src/index.ts --local=true",
