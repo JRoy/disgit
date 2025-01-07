@@ -11,3 +11,8 @@ services:
             - ./.storage/cache:/worker/cache
         ports:
             - "8080:8080"
+        healthcheck:
+            test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+            interval: 15s
+            timeout: 10s
+            retries: 3
