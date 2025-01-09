@@ -1,13 +1,15 @@
 # disgit
-A Cloudflare Worker which provides better GitHub->Discord webhook integration than the built-in Discord webhook executor.
+A Cloudflare Worker (or Docker Container) which provides better GitHub->Discord webhook integration than the built-in Discord webhook executor.
 
 You can use this Cloudflare worker by following the steps after clicking the button below 
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/JRoy/disgit)
 
 
-You can also deploy this using docker/docker-compose by cloning this repo and running
-`docker compose up --build -d`. The worker will be started on port 8080.
+You can also deploy disgit to docker container:
+* Docker Compose: Clone this repository and run `docker compose up --build -d`.
+  * The worker will be started on port 8080
+* Docker Image: The disgit container image is published to the GitHub Container Registry [here](https://github.com/JRoy/disgit/pkgs/container/disgit). For more information on how to authenticate with GitHub's container registry, check the help article [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry). 
 
 ## Environment Variables
 digit has the following optional environment variables that you can use to customize your instance;
