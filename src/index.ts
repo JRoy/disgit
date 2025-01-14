@@ -37,14 +37,18 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
             return new Response('Missing Webhook Authorization', { status: 400 });
         }
 
-        await fetch(`https://discord.com/api/webhooks/${hookId}/${hookToken}`, {
+        const result = await fetch(`https://discord.com/api/webhooks/${hookId}/${hookToken}`, {
             headers: {
                 "content-type": "application/json;charset=UTF=8"
             },
             method: "POST",
             body: embed
         })
-        return new Response(`disgit successfully executed webhook ${hookId}`, {status: 200})
+        if (result.ok) {
+            return new Response(`disgit successfully executed webhook ${hookId}`, { status: 200 })
+        } else {
+            return new Response(`Failed to send webhook ${hookId}: Got ${result.status} from discord: ${await result.text()}`, { status: 400 });
+        }
     } else {
         return new Response('Bad Request', { status: 400 })
     }
