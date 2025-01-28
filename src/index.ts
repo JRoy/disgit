@@ -441,8 +441,10 @@ function buildIssueComment(json: any, env: BoundEnv): string | null {
 function buildIssueClose(json: any): string {
     const { issue, repository, sender } = json;
 
+    const reason = issue.state_reason;
+
     return buildEmbedBody(
-        `[${repository["full_name"]}] Issue closed: #${issue.number} ${issue.title}`,
+        `[${repository["full_name"]}] Issue closed ${reason ? `as ${reason.replaceAll('_', ' ')}` : ''}: #${issue.number} ${issue.title}`,
         issue["html_url"],
         sender,
         16730159
