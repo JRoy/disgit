@@ -1,6 +1,6 @@
 {
   "name": "disgit",
-  "version": "0.0.1",
+  "version": "1 .0.0",
   "description": "A Cloudflare Worker which provides better GitHub->Discord webhook integration than the built-in Discord webhook executor.",
   "license": "Apache-2.0",
   "repository": {
@@ -17,6 +17,7 @@
     "selflare": "^1.1.2"
   },
   "scripts": {
+    "docker:build": "wrangler deploy --dry-run --outdir .wrangler/dist && selflare compile --script .wrangler/dist/index.js",
     "build": "selflare compile",
     "start": "wrangler dev src/index.ts --local=true",
     "docker": "wrangler dev index.ts --local=true",
