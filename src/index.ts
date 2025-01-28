@@ -34,7 +34,7 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
             return new Response('Missing Webhook Authorization', { status: 400 });
         }
 
-        const promise = fetch(`https://discord.com/api/webhooks/${hookId}/${hookToken}`, {
+        const result = await fetch(`https://discord.com/api/webhooks/${hookId}/${hookToken}`, {
             headers: {
                 "content-type": "application/json;charset=UTF=8"
             },
@@ -42,9 +42,7 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
             body: embed
         })
 
-        let result = env.awaitErrors ? await promise : undefined;
-
-        if (result === undefined || result.ok) {
+        if (result.ok) {
             return new Response(`disgit successfully executed webhook ${hookId}`, { status: 200 });
         }
 

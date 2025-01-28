@@ -7,7 +7,6 @@ services:
             - IGNORED_BRANCHES=${IGNORED_BRANCHES}
             - IGNORED_USERS=${IGNORED_USERS}
             - IGNORED_PAYLOADS=${IGNORED_PAYLOADS}
-            - AWAIT_ERRORS=${AWAIT_ERRORS}
             - DEBUG_PASTE=${DEBUG_PASTE}
         volumes:
             - ./.storage/cache:/worker/cache

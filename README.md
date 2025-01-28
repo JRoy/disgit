@@ -17,7 +17,6 @@ disgit has the following optional environment variables that you can use to cust
 - `IGNORED_BRANCHES` - A comma seperated list of branches that should be ignored
 - `IGNORED_USERS` - A comma seperated list of users that should be ignored
 - `IGNORED_PAYLOADS` - A comma seperated list of webhook events that should be ignored
-- `AWAIT_ERRORS` - Set to `true` to await errors from the Discord webhook executor
 - `DEBUG_PASTE` - Set to `true` to enable debug embeds.
 
 ## Supported Events
