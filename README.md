@@ -12,11 +12,13 @@ You can also deploy disgit to docker container:
 * Docker Image: The disgit container image is published to the GitHub Container Registry [here](https://github.com/JRoy/disgit/pkgs/container/disgit). For more information on how to authenticate with GitHub's container registry, check the help article [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry). 
 
 ## Environment Variables
-digit has the following optional environment variables that you can use to customize your instance;
+disgit has the following optional environment variables that you can use to customize your instance;
 - `IGNORED_BRANCHES_REGEX` - A regex pattern for branches that should be ignored
 - `IGNORED_BRANCHES` - A comma seperated list of branches that should be ignored
 - `IGNORED_USERS` - A comma seperated list of users that should be ignored
 - `IGNORED_PAYLOADS` - A comma seperated list of webhook events that should be ignored
+- `AWAIT_ERRORS` - Set to `true` to await errors from the Discord webhook executor
+- `DEBUG_PASTE` - Set to `true` to enable debug embeds.
 
 ## Supported Events
 The following webhook events are supported as of now;

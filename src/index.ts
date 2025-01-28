@@ -1,9 +1,6 @@
 import {BoundEnv, Env} from './env';
 import {Sender, shortCommit, truncate} from './util';
 
-// If true, will send paste of embed json to discord for debugging
-const debug = false;
-
 // Handles event sent by cloudflare
 async function handleRequest(request: Request, env: BoundEnv): Promise<Response> {
     const event = request.headers.get("X-GitHub-Event");
@@ -26,7 +23,7 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
             return new Response('Webhook NO-OP', {status: 200})
         }
 
-        if (debug) {
+        if (env.debugPaste) {
             embed = await env.buildDebugPaste(embed);
         }
 
@@ -37,18 +34,21 @@ async function handleRequest(request: Request, env: BoundEnv): Promise<Response>
             return new Response('Missing Webhook Authorization', { status: 400 });
         }
 
-        const result = await fetch(`https://discord.com/api/webhooks/${hookId}/${hookToken}`, {
+        const promise = fetch(`https://discord.com/api/webhooks/${hookId}/${hookToken}`, {
             headers: {
                 "content-type": "application/json;charset=UTF=8"
             },
             method: "POST",
             body: embed
         })
-        if (result.ok) {
-            return new Response(`disgit successfully executed webhook ${hookId}`, { status: 200 })
-        } else {
-            return new Response(`Failed to send webhook ${hookId}: Got ${result.status} from discord: ${await result.text()}`, { status: 400 });
+
+        let result = env.awaitErrors ? await promise : undefined;
+
+        if (result === undefined || result.ok) {
+            return new Response(`disgit successfully executed webhook ${hookId}`, { status: 200 });
         }
+
+        return new Response(`Failed to send webhook ${hookId}: Got ${result.status} from discord: ${await result.text()}`, { status: 400 });
     } else {
         return new Response('Bad Request', { status: 400 })
     }
