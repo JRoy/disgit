@@ -8,6 +8,9 @@ export interface Env {
     IGNORED_PAYLOADS: string;
 
     GITHUB_WEBHOOK_SECRET: string;
+
+    DEBUG_PASTE: string;
+    AWAIT_ERRORS: string;
 }
 
 /**
@@ -19,6 +22,8 @@ export class BoundEnv {
     private ignoredUsers: string[];
     private ignoredPayloads: string[];
     readonly githubWebhookSecret: string;
+    readonly debugPaste: boolean;
+    readonly awaitErrors: boolean;
 
     constructor(env: Env) {
         if (typeof env.IGNORED_BRANCHES_REGEX !== 'undefined') {
@@ -28,6 +33,8 @@ export class BoundEnv {
         this.ignoredUsers = env.IGNORED_USERS?.split(",") || [];
         this.ignoredPayloads = env.IGNORED_PAYLOADS?.split(",") || [];
         this.githubWebhookSecret = env.GITHUB_WEBHOOK_SECRET;
+        this.debugPaste = env.DEBUG_PASTE == "true" || env.DEBUG_PASTE == "1";
+        this.awaitErrors = env.AWAIT_ERRORS == "true" || env.AWAIT_ERRORS == "1";
     }
 
     /**
