@@ -418,7 +418,8 @@ function buildPull(json: any, env: BoundEnv): string | null {
         `[${repository["full_name"]}] ${type} opened: #${pull_request.number} ${pull_request.title}`,
         pull_request["html_url"],
         sender,
-        color
+        color,
+        pull_request.body
     );
 }
 
