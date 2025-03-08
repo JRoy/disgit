@@ -24,7 +24,7 @@ jobs:
           branch=${GITHUB_REF##*/}
           echo "IMAGE_ID=${branch}-${GITHUB_SHA::8}-${ts}" >> "$GITHUB_OUTPUT"
       - name: Publish Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
