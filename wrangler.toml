@@ -1,6 +1,6 @@
 name = "disgit"
 main = "src/index.ts"
-compatibility_date = "2022-11-10"
+compatibility_date = "2025-06-07"
 usage_model = "bundled"
 
 workers_dev = true

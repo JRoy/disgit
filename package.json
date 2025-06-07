@@ -9,9 +9,9 @@
   },
   "private": true,
   "dependencies": {
-    "@cloudflare/workers-types": "^4.20241230.0",
-    "typescript": "^5.7.2",
-    "wrangler": "^3.99.0"
+    "@cloudflare/workers-types": "^4.20250607.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.19.1"
   },
   "devDependencies": {
     "selflare": "^1.1.2"
