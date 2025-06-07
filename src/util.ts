@@ -1,3 +1,5 @@
+import { mdTruncate } from "./md-truncate";
+
 /**
  * @param {String} str
  * @param {Number} num
@@ -12,7 +14,17 @@ export function truncate(str: string, num: number): string | null {
     if (str.length <= num) {
         return str;
     }
-    return str.slice(0, num - 3) + "...";
+
+    let truncatedStr = mdTruncate(str, { limit: num, ellipsis: true });
+
+    // mdTruncate doesn't count formatting markers, so we need to ensure the length is correct
+    let trimNum = num;
+    while (truncatedStr.length < num) {
+        trimNum -= 10;
+        truncatedStr = mdTruncate(str, { limit: num, ellipsis: true });
+    }
+
+    return truncatedStr;
 }
 
 /**
