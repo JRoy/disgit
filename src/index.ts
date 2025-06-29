@@ -204,6 +204,8 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
 }
 
 function buildEmbedBody(title: string, url: string | undefined, sender: Sender, color: number, description?: string, footer?: string, fields?: any[]): string {
+    const date = new Date();
+    const avatarHash = `${date.getFullYear()}${date.getMonth()}${date.getDay()}`;
     return JSON.stringify({
         embeds: [
             {
@@ -213,7 +215,7 @@ function buildEmbedBody(title: string, url: string | undefined, sender: Sender, 
                 author: {
                     name: truncate(sender.login, 255),
                     url: sender.html_url,
-                    icon_url: sender.avatar_url
+                    icon_url: `${sender.avatar_url}#${avatarHash}`
                 },
                 color,
                 footer: footer ? {
