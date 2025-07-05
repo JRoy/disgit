@@ -1,6 +1,6 @@
 {
   "name": "disgit",
-  "version": "1 .0.0",
+  "version": "1.0.0",
   "description": "A Cloudflare Worker which provides better GitHub->Discord webhook integration than the built-in Discord webhook executor.",
   "license": "Apache-2.0",
   "repository": {
