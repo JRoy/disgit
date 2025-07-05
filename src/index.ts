@@ -215,7 +215,7 @@ function buildEmbedBody(title: string, url: string | undefined, sender: Sender, 
                 author: {
                     name: truncate(sender.login, 255),
                     url: sender.html_url,
-                    icon_url: `${sender.avatar_url}#${avatarHash}`
+                    icon_url: `${sender.avatar_url}?=${avatarHash}`
                 },
                 color,
                 footer: footer ? {
