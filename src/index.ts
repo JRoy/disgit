@@ -584,7 +584,7 @@ function buildCreateBranch(json: any, env: BoundEnv): string | null {
         `[${repository["full_name"]}] New ${ref_type} created: ${ref}`,
         undefined,
         sender,
-        1
+        3881787
     );
 }
 
@@ -599,7 +599,7 @@ function buildCommitComment(json: any, env: BoundEnv): string | null {
         `[${repository["full_name"]}] New comment on commit \`${shortCommit(comment["commit_id"])}\``,
         comment["html_url"],
         sender,
-        1,
+        3881787,
         comment.body
     );
 }
