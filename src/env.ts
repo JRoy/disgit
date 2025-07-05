@@ -11,6 +11,7 @@ export interface Env {
 
     DEBUG_PASTE: string;
     AWAIT_ERRORS: string;
+    EXECUTE_MERGE_QUEUE_BRANCHES: string;
 }
 
 /**
@@ -24,6 +25,7 @@ export class BoundEnv {
     readonly githubWebhookSecret: string;
     readonly debugPaste: boolean;
     readonly awaitErrors: boolean;
+    readonly executeMergeQueueBranches: boolean;
 
     constructor(env: Env) {
         if (typeof env.IGNORED_BRANCHES_REGEX !== 'undefined') {
@@ -35,6 +37,7 @@ export class BoundEnv {
         this.githubWebhookSecret = env.GITHUB_WEBHOOK_SECRET;
         this.debugPaste = env.DEBUG_PASTE == "true" || env.DEBUG_PASTE == "1";
         this.awaitErrors = env.AWAIT_ERRORS == "true" || env.AWAIT_ERRORS == "1";
+        this.executeMergeQueueBranches = env.EXECUTE_MERGE_QUEUE_BRANCHES == "true" || env.EXECUTE_MERGE_QUEUE_BRANCHES == "1";
     }
 
     /**
@@ -42,6 +45,10 @@ export class BoundEnv {
      * @return {boolean}
      */
     isIgnoredBranch(branch: string): boolean {
+        if (!this.executeMergeQueueBranches && branch.startsWith('gh-readonly-queue/')) {
+            return true;
+        }
+
         return (this.ignoredBranchPattern && branch.match(this.ignoredBranchPattern) != null) || this.ignoredBranches.includes(branch);
     }
 

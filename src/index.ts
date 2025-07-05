@@ -148,6 +148,12 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
                 case "ready_for_review": {
                     return buildPullReadyReview(json);
                 }
+                case "enqueued": {
+                    return buildPullEnqueue(json);
+                }
+                case "dequeued": {
+                    return buildPullDequeue(json);
+                }
                 default: {
                     return null;
                 }
@@ -305,6 +311,34 @@ function buildPush(json: any, env: BoundEnv): string | null {
         sender,
         6120164,
         description
+    );
+}
+
+function buildPullEnqueue(json: any): string {
+    const { pull_request, repository, sender } = json;
+
+    const queueUrl = `${repository["html_url"]}/queue/${pull_request.base.ref}`;
+
+    return buildEmbedBody(
+        `[${repository["full_name"]}] Pull request enqueued: #${pull_request.number} ${pull_request.title}`,
+        pull_request["html_url"],
+        sender,
+        16752896,
+        `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`
+    );
+}
+
+function buildPullDequeue(json: any): string {
+    const { pull_request, repository, sender } = json;
+
+    const queueUrl = `${repository["html_url"]}/queue/${pull_request.base.ref}`;
+
+    return buildEmbedBody(
+        `[${repository["full_name"]}] Pull request dequeued: #${pull_request.number} ${pull_request.title}`,
+        pull_request["html_url"],
+        sender,
+        13584462,
+        `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`
     );
 }
 

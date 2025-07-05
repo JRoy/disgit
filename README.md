@@ -18,6 +18,7 @@ disgit has the following optional environment variables that you can use to cust
 - `IGNORED_USERS` - A comma seperated list of users that should be ignored
 - `IGNORED_PAYLOADS` - A comma seperated list of webhook events that should be ignored
 - `DEBUG_PASTE` - Set to `true` to enable debug embeds.
+- `EXECUTE_MERGE_QUEUE_BRANCHES` - Set to `true` to unignore merge queue related branches.
 
 ## Supported Events
 The following webhook events are supported as of now;
