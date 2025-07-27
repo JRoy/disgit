@@ -2,7 +2,7 @@
 node_modules/
 .storage
 .wrangler
-.capnp
+*.capnp
 
 test/headers.http
 test/body.json

@@ -12,6 +12,7 @@ export interface Env {
     DEBUG_PASTE: string;
     AWAIT_ERRORS: string;
     EXECUTE_MERGE_QUEUE_BRANCHES: string;
+    HIDE_DETAILS_BODY: string;
 }
 
 /**
@@ -26,6 +27,7 @@ export class BoundEnv {
     readonly debugPaste: boolean;
     readonly awaitErrors: boolean;
     readonly executeMergeQueueBranches: boolean;
+    readonly hideDetailsBody: boolean;
 
     constructor(env: Env) {
         if (typeof env.IGNORED_BRANCHES_REGEX !== 'undefined') {
@@ -38,6 +40,7 @@ export class BoundEnv {
         this.debugPaste = env.DEBUG_PASTE == "true" || env.DEBUG_PASTE == "1";
         this.awaitErrors = env.AWAIT_ERRORS == "true" || env.AWAIT_ERRORS == "1";
         this.executeMergeQueueBranches = env.EXECUTE_MERGE_QUEUE_BRANCHES == "true" || env.EXECUTE_MERGE_QUEUE_BRANCHES == "1";
+        this.hideDetailsBody = env.HIDE_DETAILS_BODY == "true" || env.HIDE_DETAILS_BODY == "1";
     }
 
     /**

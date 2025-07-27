@@ -19,6 +19,7 @@ disgit has the following optional environment variables that you can use to cust
 - `IGNORED_PAYLOADS` - A comma seperated list of webhook events that should be ignored
 - `DEBUG_PASTE` - Set to `true` to enable debug embeds.
 - `EXECUTE_MERGE_QUEUE_BRANCHES` - Set to `true` to unignore merge queue related branches.
+- `HIDE_DETAILS_BODY` - Set to `true` to omit the body of details tags from messages. This will cause just summary to be shown in the message.
 
 ## Supported Events
 The following webhook events are supported as of now;

@@ -91,7 +91,7 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
             return buildDiscussionComment(json, env);
         }
         case "fork": {
-            return buildFork(json);
+            return buildFork(json, env);
         }
         case "issue_comment": {
             if (action !== "created") {
@@ -105,10 +105,10 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
                     return buildIssue(json, env);
                 }
                 case "reopened": {
-                    return buildIssueReOpen(json);
+                    return buildIssueReOpen(json, env);
                 }
                 case "closed": {
-                    return buildIssueClose(json);
+                    return buildIssueClose(json, env);
                 }
                 default: {
                     return null;
@@ -118,10 +118,10 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
         case "package": {
             switch (action) {
                 case "published": {
-                    return buildPackagePublished(json);
+                    return buildPackagePublished(json, env);
                 }
                 case "updated": {
-                    return buildPackageUpdated(json);
+                    return buildPackageUpdated(json, env);
                 }
                 default : {
                     return null;
@@ -129,7 +129,7 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
             }
         }
         case "ping": {
-            return buildPing(json);
+            return buildPing(json, env);
         }
         case "pull_request": {
             switch (action) {
@@ -137,22 +137,22 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
                     return buildPull(json, env);
                 }
                 case "closed": {
-                    return buildPullClose(json);
+                    return buildPullClose(json, env);
                 }
                 case "reopened": {
-                    return buildPullReopen(json);
+                    return buildPullReopen(json, env);
                 }
                 case "converted_to_draft": {
-                    return buildPullDraft(json);
+                    return buildPullDraft(json, env);
                 }
                 case "ready_for_review": {
-                    return buildPullReadyReview(json);
+                    return buildPullReadyReview(json, env);
                 }
                 case "enqueued": {
-                    return buildPullEnqueue(json);
+                    return buildPullEnqueue(json, env);
                 }
                 case "dequeued": {
-                    return buildPullDequeue(json);
+                    return buildPullDequeue(json, env);
                 }
                 default: {
                     return null;
@@ -163,7 +163,7 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
             switch (action) {
                 case "submitted":
                 case "dismissed": {
-                    return buildPullReview(json);
+                    return buildPullReview(json, env);
                 }
                 default: {
                     return null;
@@ -174,14 +174,14 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
             if (action !== "created") {
                 break;
             }
-            return buildPullReviewComment(json);
+            return buildPullReviewComment(json, env);
         }
         case "push": {
             return buildPush(json, env);
         }
         case "release": {
             if (action === "released" || action === "prereleased") {
-                return buildRelease(json);
+                return buildRelease(json, env);
             }
             break;
         }
@@ -189,43 +189,43 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
             if (action !== "created") {
                 break;
             }
-            return buildStar(json);
+            return buildStar(json, env);
         }
         case "deployment": {
             if (action !== "created") {
                 break;
             }
-            return buildDeployment(json);
+            return buildDeployment(json, env);
         }
         case "deployment_status": {
-            return buildDeploymentStatus(json);
+            return buildDeploymentStatus(json, env);
         }
         // Wiki
         case "gollum": {
-            return buildWiki(json);
+            return buildWiki(json, env);
         }
     }
 
     return null;
 }
 
-function buildEmbedBody(title: string, url: string | undefined, sender: Sender, color: number, description?: string, footer?: string, fields?: any[]): string {
+function buildEmbedBody(env: BoundEnv, title: string, url: string | undefined, sender: Sender, color: number, description?: string, footer?: string, fields?: any[]): string {
     const date = new Date();
     const avatarHash = `${date.getFullYear()}${date.getMonth()}${date.getDay()}`;
     return JSON.stringify({
         embeds: [
             {
-                title: truncate(title, 255),
+                title: truncate(title, 255, env.hideDetailsBody),
                 url,
-                description: description ? truncate(description, 1000) : undefined,
+                description: description ? truncate(description, 1000, env.hideDetailsBody) : undefined,
                 author: {
-                    name: truncate(sender.login, 255),
+                    name: truncate(sender.login, 255, env.hideDetailsBody),
                     url: sender.html_url,
                     icon_url: `${sender.avatar_url}?=${avatarHash}`
                 },
                 color,
                 footer: footer ? {
-                    text: truncate(footer, 255),
+                    text: truncate(footer, 255, env.hideDetailsBody),
                 } : undefined,
                 fields: fields ?? [],
             }
@@ -233,17 +233,17 @@ function buildEmbedBody(title: string, url: string | undefined, sender: Sender, 
     });
 }
 
-function buildPing(json: any): string {
+function buildPing(json: any, env: BoundEnv): string {
     const { zen, hook, repository, sender, organization } = json;
 
     const isOrg = hook['type'] == 'Organization';
 
     const name = isOrg ? organization['login'] : repository['full_name'];
 
-    return buildEmbedBody(`[${name}] ${hook.type} hook ping received`, undefined, sender, 12118406, zen);
+    return buildEmbedBody(env, `[${name}] ${hook.type} hook ping received`, undefined, sender, 12118406, zen);
 }
 
-function buildRelease(json: any): string | null {
+function buildRelease(json: any, env: BoundEnv): string | null {
     const { release, repository, sender } = json;
     const { draft, name, tag_name, body, html_url, prerelease } = release;
 
@@ -253,13 +253,7 @@ function buildRelease(json: any): string | null {
 
     let effectiveName = name == null ? tag_name : name;
 
-    return buildEmbedBody(
-        `[${repository['full_name']}] New ${prerelease ? 'pre' : ''}release published: ${effectiveName}`,
-        html_url,
-        sender,
-        14573028,
-        body
-    );
+    return buildEmbedBody(env, `[${repository['full_name']}] New ${prerelease ? 'pre' : ''}release published: ${effectiveName}`, html_url, sender, 14573028, body);
 }
 
 function buildPush(json: any, env: BoundEnv): string | null {
@@ -276,12 +270,7 @@ function buildPush(json: any, env: BoundEnv): string | null {
     }
 
     if (forced) {
-        return buildEmbedBody(
-            `[${repository["full_name"]}] Branch ${branch} was force-pushed to \`${shortCommit(after)}\``,
-            compare.replace("...", ".."),
-            sender,
-            16722234
-        );
+        return buildEmbedBody(env, `[${repository["full_name"]}] Branch ${branch} was force-pushed to \`${shortCommit(after)}\``, compare.replace("...", ".."), sender, 16722234);
     }
 
     let amount = commits.length;
@@ -295,7 +284,7 @@ function buildPush(json: any, env: BoundEnv): string | null {
     for (let i = 0; i < commits.length; i++) {
         let commit = commits[i];
         let commitUrl = commit.url;
-        let line = `[\`${shortCommit(commit.id)}\`](${commitUrl}) ${truncate(commit.message.split("\n")[0], 50)} - ${commit.author.username}
+        let line = `[\`${shortCommit(commit.id)}\`](${commitUrl}) ${truncate(commit.message.split("\n")[0], 50, env.hideDetailsBody)} - ${commit.author.username}
 `;
         if (description.length + line.length >= 1500) {
             break;
@@ -305,56 +294,32 @@ function buildPush(json: any, env: BoundEnv): string | null {
     }
     const commitWord = amount === 1 ? "commit" : "commits";
 
-    return buildEmbedBody(
-        `[${repository.name}:${branch}] ${amount} new ${commitWord}`,
-        amount === 1 ? lastCommitUrl : compare,
-        sender,
-        6120164,
-        description
-    );
+    return buildEmbedBody(env, `[${repository.name}:${branch}] ${amount} new ${commitWord}`, amount === 1 ? lastCommitUrl : compare, sender, 6120164, description);
 }
 
-function buildPullEnqueue(json: any): string {
+function buildPullEnqueue(json: any, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     const queueUrl = `${repository["html_url"]}/queue/${pull_request.base.ref}`;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Pull request enqueued: #${pull_request.number} ${pull_request.title}`,
-        pull_request["html_url"],
-        sender,
-        16752896,
-        `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Pull request enqueued: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 16752896, `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`);
 }
 
-function buildPullDequeue(json: any): string {
+function buildPullDequeue(json: any, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     const queueUrl = `${repository["html_url"]}/queue/${pull_request.base.ref}`;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Pull request dequeued: #${pull_request.number} ${pull_request.title}`,
-        pull_request["html_url"],
-        sender,
-        13584462,
-        `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Pull request dequeued: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 13584462, `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`);
 }
 
-function buildPullReviewComment(json: any): string {
+function buildPullReviewComment(json: any, env: BoundEnv): string {
     const { pull_request, comment, repository, sender } = json;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Pull request review comment: #${pull_request.number} ${pull_request.title}`,
-        comment["html_url"],
-        sender,
-        7829367,
-        comment.body
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Pull request review comment: #${pull_request.number} ${pull_request.title}`, comment["html_url"], sender, 7829367, comment.body);
 }
 
-function buildPullReview(json: any): string {
+function buildPullReview(json: any, env: BoundEnv): string {
     const { pull_request, review, repository, action, sender } = json;
 
     let state = "reviewed";
@@ -378,65 +343,39 @@ function buildPullReview(json: any): string {
         }
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Pull request ${state}: #${pull_request.number} ${pull_request.title}`,
-        review["html_url"],
-        sender,
-        color,
-        review.body
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Pull request ${state}: #${pull_request.number} ${pull_request.title}`, review["html_url"], sender, color, review.body);
 }
 
-function buildPullReadyReview(json: any): string {
+function buildPullReadyReview(json: any, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Pull request marked for review: #${pull_request.number} ${pull_request.title}`,
-        pull_request["html_url"],
-        sender,
-        37378
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Pull request marked for review: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 37378);
 }
 
-function buildPullDraft(json: any): string {
+function buildPullDraft(json: any, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Pull request marked as draft: #${pull_request.number} ${pull_request.title}`,
-        pull_request["html_url"],
-        sender,
-        10987431
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Pull request marked as draft: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 10987431);
 }
 
-function buildPullReopen(json: any): string {
+function buildPullReopen(json: any, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     let draft = pull_request.draft;
     let color = draft ? 10987431 : 37378;
     let type = draft ? "Draft pull request" : "Pull request"
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] ${type} reopened: #${pull_request.number} ${pull_request.title}`,
-        pull_request["html_url"],
-        sender,
-        color
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] ${type} reopened: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, color);
 }
 
-function buildPullClose(json: any): string {
+function buildPullClose(json: any, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     let merged = pull_request.merged;
     let color = merged ? 8866047 : 16722234;
     let status = merged ? "merged" : "closed";
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Pull request ${status}: #${pull_request.number} ${pull_request.title}`,
-        pull_request["html_url"],
-        sender,
-        color
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Pull request ${status}: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, color);
 }
 
 function buildPull(json: any, env: BoundEnv): string | null {
@@ -450,13 +389,7 @@ function buildPull(json: any, env: BoundEnv): string | null {
     let color = draft ? 10987431 : 37378;
     let type = draft ? "Draft pull request" : "Pull request"
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] ${type} opened: #${pull_request.number} ${pull_request.title}`,
-        pull_request["html_url"],
-        sender,
-        color,
-        pull_request.body
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] ${type} opened: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, color, pull_request.body);
 }
 
 function buildIssueComment(json: any, env: BoundEnv): string | null {
@@ -468,37 +401,21 @@ function buildIssueComment(json: any, env: BoundEnv): string | null {
 
     let entity = "pull_request" in issue ? "pull request" : "issue";
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] New comment on ${entity}: #${issue.number} ${issue.title}`,
-        comment["html_url"],
-        sender,
-        11373312,
-        comment.body
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] New comment on ${entity}: #${issue.number} ${issue.title}`, comment["html_url"], sender, 11373312, comment.body);
 }
 
-function buildIssueClose(json: any): string {
+function buildIssueClose(json: any, env: BoundEnv): string {
     const { issue, repository, sender } = json;
 
     const reason = issue.state_reason;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Issue closed ${reason ? `as ${reason.replaceAll('_', ' ')}` : ''}: #${issue.number} ${issue.title}`,
-        issue["html_url"],
-        sender,
-        16730159
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Issue closed ${reason ? `as ${reason.replaceAll('_', ' ')}` : ''}: #${issue.number} ${issue.title}`, issue["html_url"], sender, 16730159);
 }
 
-function buildIssueReOpen(json: any): string {
+function buildIssueReOpen(json: any, env: BoundEnv): string {
     const { issue, repository, sender } = json;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Issue reopened: #${issue.number} ${issue.title}`,
-        issue["html_url"],
-        sender,
-        16743680
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Issue reopened: #${issue.number} ${issue.title}`, issue["html_url"], sender, 16743680);
 }
 
 function buildIssue(json: any, env: BoundEnv): string | null {
@@ -508,48 +425,27 @@ function buildIssue(json: any, env: BoundEnv): string | null {
         return null;
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Issue opened: #${issue.number} ${issue.title}`,
-        issue["html_url"],
-        sender,
-        16743680,
-        issue.body
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Issue opened: #${issue.number} ${issue.title}`, issue["html_url"], sender, 16743680, issue.body);
 }
 
-function buildPackagePublished(json: any): string {
+function buildPackagePublished(json: any, env: BoundEnv): string {
     const { sender, repository } = json;
     const pkg = "package" in json ? json.package : json["registry_package"];
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Package Published: ${pkg.namespace}/${pkg.name}`,
-        pkg["package_version"]["html_url"],
-        sender,
-        37378
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Package Published: ${pkg.namespace}/${pkg.name}`, pkg["package_version"]["html_url"], sender, 37378);
 }
 
-function buildPackageUpdated(json: any): string {
+function buildPackageUpdated(json: any, env: BoundEnv): string {
     const { sender, repository } = json;
     const pkg = "package" in json ? json.package : json["registry_package"];
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Package Updated: ${pkg.namespace}/${pkg.name}`,
-        pkg["package_version"]["html_url"],
-        sender,
-        37378
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Package Updated: ${pkg.namespace}/${pkg.name}`, pkg["package_version"]["html_url"], sender, 37378);
 }
 
-function buildFork(json: any): string {
+function buildFork(json: any, env: BoundEnv): string {
     const { sender, repository, forkee } = json;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Fork Created: ${forkee["full_name"]}`,
-        forkee["html_url"],
-        sender,
-        16562432
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Fork Created: ${forkee["full_name"]}`, forkee["html_url"], sender, 16562432);
 }
 
 function buildDiscussionComment(json: any, env: BoundEnv): string | null {
@@ -560,14 +456,7 @@ function buildDiscussionComment(json: any, env: BoundEnv): string | null {
         return null;
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] New comment on discussion: #${discussion.number} ${discussion.title}`,
-        comment["html_url"],
-        sender,
-        35446,
-        comment.body,
-        `Discussion Category: ${category.name}`
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] New comment on discussion: #${discussion.number} ${discussion.title}`, comment["html_url"], sender, 35446, comment.body, `Discussion Category: ${category.name}`);
 }
 
 function buildDiscussion(json: any, env: BoundEnv): string | null {
@@ -578,14 +467,7 @@ function buildDiscussion(json: any, env: BoundEnv): string | null {
         return null;
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] New discussion: #${discussion.number} ${discussion.title}`,
-        discussion["html_url"],
-        sender,
-        9737471,
-        discussion.body,
-        `Discussion Category: ${category.name}`
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] New discussion: #${discussion.number} ${discussion.title}`, discussion["html_url"], sender, 9737471, discussion.body, `Discussion Category: ${category.name}`);
 }
 
 function buildDeleteBranch(json: any, env: BoundEnv): string | null {
@@ -595,12 +477,7 @@ function buildDeleteBranch(json: any, env: BoundEnv): string | null {
         return null;
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] ${ref_type} deleted: ${ref}`,
-        undefined,
-        sender,
-        1
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] ${ref_type} deleted: ${ref}`, undefined, sender, 1);
 }
 
 function buildCreateBranch(json: any, env: BoundEnv): string | null {
@@ -614,12 +491,7 @@ function buildCreateBranch(json: any, env: BoundEnv): string | null {
         return null;
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] New ${ref_type} created: ${ref}`,
-        undefined,
-        sender,
-        3881787
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] New ${ref_type} created: ${ref}`, undefined, sender, 3881787);
 }
 
 function buildCommitComment(json: any, env: BoundEnv): string | null {
@@ -629,13 +501,7 @@ function buildCommitComment(json: any, env: BoundEnv): string | null {
         return null;
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] New comment on commit \`${shortCommit(comment["commit_id"])}\``,
-        comment["html_url"],
-        sender,
-        3881787,
-        comment.body
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] New comment on commit \`${shortCommit(comment["commit_id"])}\``, comment["html_url"], sender, 3881787, comment.body);
 }
 
 function buildCheck(json: any, env: BoundEnv): string | null {
@@ -687,7 +553,7 @@ function buildCheck(json: any, env: BoundEnv): string | null {
     if (output.title != null) {
         fields.push({
             name: "Output Title",
-            value: truncate(output.title, 1000),
+            value: truncate(output.title, 1000, env.hideDetailsBody),
             inline: true
         });
     }
@@ -695,46 +561,28 @@ function buildCheck(json: any, env: BoundEnv): string | null {
     if (output.summary != null) {
         fields.push({
             name: "Output Summary",
-            value: truncate(output.summary, 1000),
+            value: truncate(output.summary, 1000, env.hideDetailsBody),
             inline: false
         });
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Actions check ${status} on ${target}`,
-        html_url,
-        sender,
-        color,
-        undefined,
-        undefined,
-        fields
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Actions check ${status} on ${target}`, html_url, sender, color, undefined, undefined, fields);
 }
 
-function buildStar(json: any): string {
+function buildStar(json: any, env: BoundEnv): string {
     const { sender, repository } = json;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] New star added`,
-        repository["html_url"],
-        sender,
-        16562432
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] New star added`, repository["html_url"], sender, 16562432);
 }
 
-function buildDeployment(json: any) {
+function buildDeployment(json: any, env: BoundEnv) {
     const { deployment, repository, sender } = json;
     const { description, payload } = deployment;
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Deployment started for ${description}`,
-        payload["web_url"] === null ? "" : payload["web_url"],
-        sender,
-        11158713
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Deployment started for ${description}`, payload["web_url"] === null ? "" : payload["web_url"], sender, 11158713);
 }
 
-function buildDeploymentStatus(json: any) {
+function buildDeploymentStatus(json: any, env: BoundEnv) {
     const { deployment, deployment_status, repository, sender } = json;
     const { description, payload } = deployment;
     const { state } = deployment_status;
@@ -759,15 +607,10 @@ function buildDeploymentStatus(json: any) {
         }
     }
 
-    return buildEmbedBody(
-        `[${repository["full_name"]}] Deployment for ${description} ${term}`,
-        payload["web_url"] === null ? "" : payload["web_url"],
-        sender,
-        color
-    );
+    return buildEmbedBody(env, `[${repository["full_name"]}] Deployment for ${description} ${term}`, payload["web_url"] === null ? "" : payload["web_url"], sender, color);
 }
 
-function buildWiki(json: any): string | null {
+function buildWiki(json: any, env: BoundEnv): string | null {
     const { pages, sender, repository } = json;
 
     // Pages is always an array with several "actions".
@@ -823,13 +666,7 @@ function buildWiki(json: any): string | null {
     message = `[${repository["full_name"]}] ${message}`;
 
     // Build the embed, with the sender as the author, the message as the title, and the edited pages as the description.
-    return buildEmbedBody(
-        message,
-        repository["html_url"],
-        sender,
-        color,
-        titles.join("\n"),
-    );
+    return buildEmbedBody(env, message, repository["html_url"], sender, color, titles.join("\n"));
 }
 
 function handleError(error: any): Response {
@@ -849,7 +686,7 @@ export default {
     async fetch(
         request: Request,
         env: Env,
-        ctx: ExecutionContext
+        _: ExecutionContext
     ): Promise<Response> {
         const url = new URL(request.url)
         if (url.pathname === "/health") {
