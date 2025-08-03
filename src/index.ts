@@ -305,8 +305,14 @@ function buildPullEnqueue(json: any, env: BoundEnv): string {
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request enqueued: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 16752896, `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`);
 }
 
-function buildPullDequeue(json: any, env: BoundEnv): string {
+function buildPullDequeue(json: any, env: BoundEnv): string | null {
     const { pull_request, repository, sender } = json;
+
+    // If the pull request is already merged, ignore the dequeue event
+    // as the merge event will be handled separately.
+    if (pull_request.merged_at) {
+        return null;
+    }
 
     const queueUrl = `${repository["html_url"]}/queue/${pull_request.base.ref}`;
 
