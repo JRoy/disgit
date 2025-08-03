@@ -1,5 +1,36 @@
 import {BoundEnv, Env} from './env';
 import {Sender, shortCommit, truncate} from './util';
+import {
+    BranchCreatedWebhookPayload,
+    BranchDeletedWebhookPayload,
+    CheckRunCompletedWebhookPayload,
+    CommitCommentCreatedWebhookPayload,
+    DeploymentCreatedWebhookPayload, DeploymentStatusCreatedWebhookPayload,
+    DiscussionCommentCreatedWebhookPayload,
+    DiscussionCreatedWebhookPayload,
+    ForkWebhookPayload,
+    IssueClosedWebhookPayload,
+    IssueCommentCreatedWebhookPayload,
+    IssueCreatedWebhookPayload,
+    IssueReopenedWebhookPayload,
+    PackagePublishedWebhookPayload,
+    PackageUpdatedWebhookPayload,
+    PingWebhookPayload,
+    PrereleaseCreatedWebhookPayload,
+    PullRequestClosedWebhookPayload,
+    PullRequestDequeuedWebhookPayload,
+    PullRequestDraftWebhookPayload,
+    PullRequestEnqueuedWebhookPayload,
+    PullRequestOpenedWebhookPayload,
+    PullRequestReadyWebhookPayload,
+    PullRequestReopenedWebhookPayload,
+    PullRequestReviewCommentWebhookPayload,
+    PullRequestReviewDismissedWebhookPayload,
+    PullRequestReviewSubmittedWebhookPayload,
+    PushWebhookPayload,
+    ReleaseCreatedWebhookPayload,
+    StarCreatedWebhookPayload, WikiWebhookPayload
+} from "./types";
 
 // Handles event sent by cloudflare
 async function handleRequest(request: Request, env: BoundEnv): Promise<Response> {
@@ -209,7 +240,7 @@ function buildEmbed(json: any, event: string, env: BoundEnv): string | null {
     return null;
 }
 
-function buildEmbedBody(env: BoundEnv, title: string, url: string | undefined, sender: Sender, color: number, description?: string, footer?: string, fields?: any[]): string {
+function buildEmbedBody(env: BoundEnv, title: string, url: string | undefined, sender: Sender, color: number, description?: string | null, footer?: string, fields?: any[]): string {
     const date = new Date();
     const avatarHash = `${date.getFullYear()}${date.getMonth()}${date.getDay()}`;
     return JSON.stringify({
@@ -233,21 +264,24 @@ function buildEmbedBody(env: BoundEnv, title: string, url: string | undefined, s
     });
 }
 
-function buildPing(json: any, env: BoundEnv): string {
+function buildPing(json: PingWebhookPayload, env: BoundEnv): string | null {
     const { zen, hook, repository, sender, organization } = json;
+    if (!sender) {
+        return null;
+    }
 
-    const isOrg = hook['type'] == 'Organization';
+    const isOrg = hook?.['type'] === 'Organization';
 
-    const name = isOrg ? organization['login'] : repository['full_name'];
+    const name = isOrg ? organization?.['login'] : repository?.['full_name'];
 
-    return buildEmbedBody(env, `[${name}] ${hook.type} hook ping received`, undefined, sender, 12118406, zen);
+    return buildEmbedBody(env, `[${name}] ${hook?.type} hook ping received`, undefined, sender, 12118406, zen);
 }
 
-function buildRelease(json: any, env: BoundEnv): string | null {
+function buildRelease(json: ReleaseCreatedWebhookPayload | PrereleaseCreatedWebhookPayload, env: BoundEnv): string | null {
     const { release, repository, sender } = json;
     const { draft, name, tag_name, body, html_url, prerelease } = release;
 
-    if (draft) {
+    if (draft || !sender) {
         return null;
     }
 
@@ -256,16 +290,16 @@ function buildRelease(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository['full_name']}] New ${prerelease ? 'pre' : ''}release published: ${effectiveName}`, html_url, sender, 14573028, body);
 }
 
-function buildPush(json: any, env: BoundEnv): string | null {
+function buildPush(json: PushWebhookPayload, env: BoundEnv): string | null {
     const { commits, forced, after, repository, ref, compare, sender } = json;
 
-    let branch = ref.substring(11);
-
-    if (env.isIgnoredBranch(branch)) {
+    if (!sender) {
         return null;
     }
 
-    if (env.isIgnoredUser(sender.login)) {
+    let branch = ref.substring(11);
+
+    if (env.isIgnoredBranch(branch) || env.isIgnoredUser(sender.login)) {
         return null;
     }
 
@@ -297,7 +331,7 @@ function buildPush(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository.name}:${branch}] ${amount} new ${commitWord}`, amount === 1 ? lastCommitUrl : compare, sender, 6120164, description);
 }
 
-function buildPullEnqueue(json: any, env: BoundEnv): string {
+function buildPullEnqueue(json: PullRequestEnqueuedWebhookPayload, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     const queueUrl = `${repository["html_url"]}/queue/${pull_request.base.ref}`;
@@ -305,7 +339,7 @@ function buildPullEnqueue(json: any, env: BoundEnv): string {
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request enqueued: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 16752896, `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`);
 }
 
-function buildPullDequeue(json: any, env: BoundEnv): string | null {
+function buildPullDequeue(json: PullRequestDequeuedWebhookPayload, env: BoundEnv): string | null {
     const { pull_request, repository, sender } = json;
 
     // If the pull request is already merged, ignore the dequeue event
@@ -319,13 +353,13 @@ function buildPullDequeue(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request dequeued: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 13584462, `[View \`${pull_request.base.ref}\` merge queue](${queueUrl})`);
 }
 
-function buildPullReviewComment(json: any, env: BoundEnv): string {
+function buildPullReviewComment(json: PullRequestReviewCommentWebhookPayload, env: BoundEnv): string {
     const { pull_request, comment, repository, sender } = json;
 
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request review comment: #${pull_request.number} ${pull_request.title}`, comment["html_url"], sender, 7829367, comment.body);
 }
 
-function buildPullReview(json: any, env: BoundEnv): string {
+function buildPullReview(json: PullRequestReviewSubmittedWebhookPayload | PullRequestReviewDismissedWebhookPayload, env: BoundEnv): string {
     const { pull_request, review, repository, action, sender } = json;
 
     let state = "reviewed";
@@ -352,19 +386,19 @@ function buildPullReview(json: any, env: BoundEnv): string {
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request ${state}: #${pull_request.number} ${pull_request.title}`, review["html_url"], sender, color, review.body);
 }
 
-function buildPullReadyReview(json: any, env: BoundEnv): string {
+function buildPullReadyReview(json: PullRequestReadyWebhookPayload, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request marked for review: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 37378);
 }
 
-function buildPullDraft(json: any, env: BoundEnv): string {
+function buildPullDraft(json: PullRequestDraftWebhookPayload, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request marked as draft: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, 10987431);
 }
 
-function buildPullReopen(json: any, env: BoundEnv): string {
+function buildPullReopen(json: PullRequestReopenedWebhookPayload, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     let draft = pull_request.draft;
@@ -374,7 +408,7 @@ function buildPullReopen(json: any, env: BoundEnv): string {
     return buildEmbedBody(env, `[${repository["full_name"]}] ${type} reopened: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, color);
 }
 
-function buildPullClose(json: any, env: BoundEnv): string {
+function buildPullClose(json: PullRequestClosedWebhookPayload, env: BoundEnv): string {
     const { pull_request, repository, sender } = json;
 
     let merged = pull_request.merged;
@@ -384,7 +418,7 @@ function buildPullClose(json: any, env: BoundEnv): string {
     return buildEmbedBody(env, `[${repository["full_name"]}] Pull request ${status}: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, color);
 }
 
-function buildPull(json: any, env: BoundEnv): string | null {
+function buildPull(json: PullRequestOpenedWebhookPayload, env: BoundEnv): string | null {
     const { pull_request, repository, sender } = json;
 
     if (env.isIgnoredUser(sender.login)) {
@@ -398,7 +432,7 @@ function buildPull(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] ${type} opened: #${pull_request.number} ${pull_request.title}`, pull_request["html_url"], sender, color, pull_request.body);
 }
 
-function buildIssueComment(json: any, env: BoundEnv): string | null {
+function buildIssueComment(json: IssueCommentCreatedWebhookPayload, env: BoundEnv): string | null {
     const { issue, comment, repository, sender } = json;
 
     if (env.isIgnoredUser(sender.login)) {
@@ -410,7 +444,7 @@ function buildIssueComment(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] New comment on ${entity}: #${issue.number} ${issue.title}`, comment["html_url"], sender, 11373312, comment.body);
 }
 
-function buildIssueClose(json: any, env: BoundEnv): string {
+function buildIssueClose(json: IssueClosedWebhookPayload, env: BoundEnv): string {
     const { issue, repository, sender } = json;
 
     const reason = issue.state_reason;
@@ -418,13 +452,13 @@ function buildIssueClose(json: any, env: BoundEnv): string {
     return buildEmbedBody(env, `[${repository["full_name"]}] Issue closed ${reason ? `as ${reason.replaceAll('_', ' ')}` : ''}: #${issue.number} ${issue.title}`, issue["html_url"], sender, 16730159);
 }
 
-function buildIssueReOpen(json: any, env: BoundEnv): string {
+function buildIssueReOpen(json: IssueReopenedWebhookPayload, env: BoundEnv): string {
     const { issue, repository, sender } = json;
 
     return buildEmbedBody(env, `[${repository["full_name"]}] Issue reopened: #${issue.number} ${issue.title}`, issue["html_url"], sender, 16743680);
 }
 
-function buildIssue(json: any, env: BoundEnv): string | null {
+function buildIssue(json: IssueCreatedWebhookPayload, env: BoundEnv): string | null {
     const { issue, repository, sender } = json;
 
     if (env.isIgnoredUser(sender.login)) {
@@ -434,27 +468,31 @@ function buildIssue(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] Issue opened: #${issue.number} ${issue.title}`, issue["html_url"], sender, 16743680, issue.body);
 }
 
-function buildPackagePublished(json: any, env: BoundEnv): string {
+function buildPackagePublished(json: PackagePublishedWebhookPayload, env: BoundEnv): string | null {
     const { sender, repository } = json;
+    if (!repository) {
+        return null;
+    }
+
     const pkg = "package" in json ? json.package : json["registry_package"];
 
-    return buildEmbedBody(env, `[${repository["full_name"]}] Package Published: ${pkg.namespace}/${pkg.name}`, pkg["package_version"]["html_url"], sender, 37378);
+    return buildEmbedBody(env, `[${repository["full_name"]}] Package Published: ${pkg.namespace}/${pkg.name}`, pkg["package_version"]?.["html_url"], sender, 37378);
 }
 
-function buildPackageUpdated(json: any, env: BoundEnv): string {
+function buildPackageUpdated(json: PackageUpdatedWebhookPayload, env: BoundEnv): string {
     const { sender, repository } = json;
     const pkg = "package" in json ? json.package : json["registry_package"];
 
     return buildEmbedBody(env, `[${repository["full_name"]}] Package Updated: ${pkg.namespace}/${pkg.name}`, pkg["package_version"]["html_url"], sender, 37378);
 }
 
-function buildFork(json: any, env: BoundEnv): string {
+function buildFork(json: ForkWebhookPayload, env: BoundEnv): string {
     const { sender, repository, forkee } = json;
 
     return buildEmbedBody(env, `[${repository["full_name"]}] Fork Created: ${forkee["full_name"]}`, forkee["html_url"], sender, 16562432);
 }
 
-function buildDiscussionComment(json: any, env: BoundEnv): string | null {
+function buildDiscussionComment(json: DiscussionCommentCreatedWebhookPayload, env: BoundEnv): string | null {
     const { discussion, comment, repository, sender } = json;
     const { category } = discussion;
 
@@ -465,7 +503,7 @@ function buildDiscussionComment(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] New comment on discussion: #${discussion.number} ${discussion.title}`, comment["html_url"], sender, 35446, comment.body, `Discussion Category: ${category.name}`);
 }
 
-function buildDiscussion(json: any, env: BoundEnv): string | null {
+function buildDiscussion(json: DiscussionCreatedWebhookPayload, env: BoundEnv): string | null {
     const { discussion, repository, sender } = json;
     const { category } = discussion;
 
@@ -476,7 +514,7 @@ function buildDiscussion(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] New discussion: #${discussion.number} ${discussion.title}`, discussion["html_url"], sender, 9737471, discussion.body, `Discussion Category: ${category.name}`);
 }
 
-function buildDeleteBranch(json: any, env: BoundEnv): string | null {
+function buildDeleteBranch(json: BranchDeletedWebhookPayload, env: BoundEnv): string | null {
     const { ref, ref_type, repository, sender } = json;
 
     if (ref_type == "branch" && env.isIgnoredBranch(ref)) {
@@ -486,7 +524,7 @@ function buildDeleteBranch(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] ${ref_type} deleted: ${ref}`, undefined, sender, 1);
 }
 
-function buildCreateBranch(json: any, env: BoundEnv): string | null {
+function buildCreateBranch(json: BranchCreatedWebhookPayload, env: BoundEnv): string | null {
     const { ref, ref_type, repository, sender } = json;
 
     if (env.isIgnoredUser(sender.login)) {
@@ -500,7 +538,7 @@ function buildCreateBranch(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] New ${ref_type} created: ${ref}`, undefined, sender, 3881787);
 }
 
-function buildCommitComment(json: any, env: BoundEnv): string | null {
+function buildCommitComment(json: CommitCommentCreatedWebhookPayload, env: BoundEnv): string | null {
     const { sender, comment, repository } = json;
 
     if (env.isIgnoredUser(sender.login)) {
@@ -510,7 +548,7 @@ function buildCommitComment(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] New comment on commit \`${shortCommit(comment["commit_id"])}\``, comment["html_url"], sender, 3881787, comment.body);
 }
 
-function buildCheck(json: any, env: BoundEnv): string | null {
+function buildCheck(json: CheckRunCompletedWebhookPayload, env: BoundEnv): string | null {
     const { check_run, repository, sender } = json;
     const { conclusion, output, html_url, check_suite } = check_run;
 
@@ -524,7 +562,7 @@ function buildCheck(json: any, env: BoundEnv): string | null {
         return null;
     }
 
-    if (check_suite["pull_requests"].length > 0) {
+    if (check_suite.pull_requests && check_suite.pull_requests.length > 0) {
         let pull = check_suite["pull_requests"][0];
         if (pull.url.startsWith(`https://api.github.com/repos/${repository["full_name"]}`)) {
             target = `PR #${pull.number}`
@@ -559,7 +597,7 @@ function buildCheck(json: any, env: BoundEnv): string | null {
     if (output.title != null) {
         fields.push({
             name: "Output Title",
-            value: truncate(output.title, 1000, env.hideDetailsBody),
+            value: truncate(output.title, 1000, env.hideDetailsBody)!,
             inline: true
         });
     }
@@ -567,7 +605,7 @@ function buildCheck(json: any, env: BoundEnv): string | null {
     if (output.summary != null) {
         fields.push({
             name: "Output Summary",
-            value: truncate(output.summary, 1000, env.hideDetailsBody),
+            value: truncate(output.summary, 1000, env.hideDetailsBody)!,
             inline: false
         });
     }
@@ -575,22 +613,24 @@ function buildCheck(json: any, env: BoundEnv): string | null {
     return buildEmbedBody(env, `[${repository["full_name"]}] Actions check ${status} on ${target}`, html_url, sender, color, undefined, undefined, fields);
 }
 
-function buildStar(json: any, env: BoundEnv): string {
+function buildStar(json: StarCreatedWebhookPayload, env: BoundEnv): string {
     const { sender, repository } = json;
 
     return buildEmbedBody(env, `[${repository["full_name"]}] New star added`, repository["html_url"], sender, 16562432);
 }
 
-function buildDeployment(json: any, env: BoundEnv) {
+function buildDeployment(json: DeploymentCreatedWebhookPayload, env: BoundEnv) {
     const { deployment, repository, sender } = json;
-    const { description, payload } = deployment;
+    const { description } = deployment;
+
+    const payload = deployment["payload"] as any;
 
     return buildEmbedBody(env, `[${repository["full_name"]}] Deployment started for ${description}`, payload["web_url"] === null ? "" : payload["web_url"], sender, 11158713);
 }
 
-function buildDeploymentStatus(json: any, env: BoundEnv) {
+function buildDeploymentStatus(json: DeploymentStatusCreatedWebhookPayload, env: BoundEnv) {
     const { deployment, deployment_status, repository, sender } = json;
-    const { description, payload } = deployment;
+    const { description } = deployment;
     const { state } = deployment_status;
 
     let color = 16726843;
@@ -613,10 +653,12 @@ function buildDeploymentStatus(json: any, env: BoundEnv) {
         }
     }
 
+    const payload = deployment["payload"] as any;
+
     return buildEmbedBody(env, `[${repository["full_name"]}] Deployment for ${description} ${term}`, payload["web_url"] === null ? "" : payload["web_url"], sender, color);
 }
 
-function buildWiki(json: any, env: BoundEnv): string | null {
+function buildWiki(json: WikiWebhookPayload, env: BoundEnv): string | null {
     const { pages, sender, repository } = json;
 
     // Pages is always an array with several "actions".
