@@ -826,6 +826,10 @@ function buildCheck(
     return null;
   }
 
+  if (env.isIgnoredCheckRun(check_run.name)) {
+    return null;
+  }
+
   if (check_suite.pull_requests && check_suite.pull_requests.length > 0) {
     let pull = check_suite['pull_requests'][0];
     if (

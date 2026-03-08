@@ -6,6 +6,7 @@ export interface Env {
     IGNORED_BRANCHES: string;
     IGNORED_USERS: string;
     IGNORED_PAYLOADS: string;
+    IGNORED_CHECK_RUNS: string;
 
     GITHUB_WEBHOOK_SECRET: string;
 
@@ -23,6 +24,7 @@ export class BoundEnv {
     private ignoredBranches: string[];
     private ignoredUsers: string[];
     private ignoredPayloads: string[];
+    private ignoredCheckRuns: string[];
     readonly githubWebhookSecret: string;
     readonly debugPaste: boolean;
     readonly awaitErrors: boolean;
@@ -36,6 +38,7 @@ export class BoundEnv {
         this.ignoredBranches = env.IGNORED_BRANCHES?.split(",") || [];
         this.ignoredUsers = env.IGNORED_USERS?.split(",") || [];
         this.ignoredPayloads = env.IGNORED_PAYLOADS?.split(",") || [];
+        this.ignoredCheckRuns = env.IGNORED_CHECK_RUNS?.split(",") || [];
         this.githubWebhookSecret = env.GITHUB_WEBHOOK_SECRET;
         this.debugPaste = env.DEBUG_PASTE == "true" || env.DEBUG_PASTE == "1";
         this.awaitErrors = env.AWAIT_ERRORS == "true" || env.AWAIT_ERRORS == "1";
@@ -69,6 +72,14 @@ export class BoundEnv {
      */
     isIgnoredPayload(payload: string): boolean {
         return this.ignoredPayloads.includes(payload);
+    }
+
+    /**
+     * @param {String} name
+     * @return {boolean}
+     */
+    isIgnoredCheckRun(name: string): boolean {
+        return this.ignoredCheckRuns.includes(name);
     }
 
     async buildDebugPaste(embed: any): Promise<string> {

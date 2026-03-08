@@ -17,6 +17,7 @@ disgit has the following optional environment variables that you can use to cust
 - `IGNORED_BRANCHES` - A comma seperated list of branches that should be ignored
 - `IGNORED_USERS` - A comma seperated list of users that should be ignored
 - `IGNORED_PAYLOADS` - A comma seperated list of webhook events that should be ignored
+- `IGNORED_CHECK_RUNS` - A comma separated list of check run names that should be ignored
 - `DEBUG_PASTE` - Set to `true` to enable debug embeds.
 - `EXECUTE_MERGE_QUEUE_BRANCHES` - Set to `true` to unignore merge queue related branches.
 - `HIDE_DETAILS_BODY` - Set to `true` to omit the body of details tags from messages. This will cause just summary to be shown in the message.
