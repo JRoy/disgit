@@ -37,13 +37,15 @@ export function truncate(str: string, num: number, hideDetailsBody: boolean): st
         return str;
     }
 
-    let truncatedStr = mdTruncate(str, {limit: num, ellipsis: true});
-
-    // mdTruncate doesn't count formatting markers, so we need to ensure the length is correct
     let trimNum = num;
-    while (truncatedStr.length < num) {
+    let truncatedStr = mdTruncate(str, {limit: trimNum, ellipsis: true});
+
+    // mdTruncate counts content characters only (ignoring formatting markers) and
+    // appends an ellipsis, so the resulting string can exceed `num`. Shrink the
+    // limit until the actual rendered length fits within `num`.
+    while (truncatedStr.length > num && trimNum > 0) {
         trimNum -= 10;
-        truncatedStr = mdTruncate(str, {limit: num, ellipsis: true});
+        truncatedStr = mdTruncate(str, {limit: trimNum, ellipsis: true});
     }
 
     return truncatedStr;
